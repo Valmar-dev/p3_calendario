@@ -1,7 +1,7 @@
 # evento/urls.py
 from django.urls import path
-from .views import EventoList
+from .views import EventoCadastro
 
 urlpatterns = [
-    path('mensal/', EventoList.as_view(), name='evento-list'),  # Alterei o caminho para apenas '/mensal/'
+    path('cadastro/', EventoCadastro.as_view(), name='evento-cadastro'),
 ]
