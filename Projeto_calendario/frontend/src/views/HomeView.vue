@@ -2,11 +2,14 @@
   <div class="home-view">
     
     <header>
+
       <section id="escolhaData" class="menu-suspenso">
+
         <div id="mesEscolha" @mouseleave="controleMenuMes('ocultar')" @mouseenter="controleMenuMes(this.exibirMenuMes)" class="lista-escolha">
 
           <ul class="lista-meses" >
             <li id="headerMes" class="header-lista">Mês</li>
+
             <div v-if="exibirMenuMes">
               <li class="mes" @click="procurarEventosMes(1, this.anoSelecionado)">Janeiro</li>
               <li class="mes" @click="procurarEventosMes(2, this.anoSelecionado)">Fevereiro</li>
@@ -21,22 +24,31 @@
               <li class="mes" @click="procurarEventosMes(11, this.anoSelecionado)">Novembro</li>
               <li class="mes" @click="procurarEventosMes(12, this.anoSelecionado)">Dezembro</li>
             </div>
+
           </ul>
+
         </div>
+
         <div id="anoEscolha" @mouseleave="controleMenuAno('ocultar')" @mouseenter="controleMenuAno(this.exibirMenuAno)" class="lista-escolha">
           <!-- loop para gerar os próximos 3 anos -->
           <ul class="lista-anos">
+
             <li id="headerAno" class="header-lista">Ano</li>
             <div  v-if="exibirMenuAno">
               <li class="ano" v-for="numero in 3" :key="numero" :id="`${this.anoAtual + numero}`" @click="procurarEventosMes(this.mesSelecionado, (this.anoAtual - 1 ) + numero)">{{(this.anoAtual - 1 ) + numero}}</li>
             </div>
+
           </ul>
+
         </div>
+
       </section>
 
       <section id="dataEscolhida">
-        <h1>{{this.mesSelecionadoString}}</h1>
+
+        <h1 style="margin-right: 10px;">{{this.mesSelecionadoString}}</h1>
         <h1>{{this.anoSelecionado}}</h1>
+
       </section>
 
     </header>
@@ -47,32 +59,60 @@
 
         <!-- display grid de 7 colunas -->
         <div id="diasMes">
+
           <ul class="diasSemana">
+
             <li class="dia" v-for="numero in this.contagemDia" :key="numero" @click="procurarEventosDia(numero, this.mesSelecionado)">
               {{numero}}
             </li>
+
           </ul>
 
           <div v-if="mostrarDia" class="s">
+
             <div class="background-card" @click="ocultarCard()"></div>
 
             <div class="card" :style="{height: cardAltura + 'px'}">
-              <div class="bar" @mousedown="mudarAltura()" @touchstart="mudarAltura()"></div>
-              <!-- teste -->
-              <button class="botao-fechar" @click="ocultarCard()">
-                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50">
-                <path d="M 7.71875 6.28125 L 6.28125 7.71875 L 23.5625 25 L 6.28125 42.28125 L 7.71875 43.71875 L 25 26.4375 L 42.28125 43.71875 L 43.71875 42.28125 L 26.4375 25 L 43.71875 7.71875 L 42.28125 6.28125 L 25 23.5625 Z"></path>
-                </svg>
-              </button>
-              <h2>Eventos no dia {{this.diaSelecionado}} de {{this.mesSelecionadoString}} de {{this.anoSelecionado}}</h2>
-              <section v-for="evento in eventos" :key="evento.id">
-                <h1>{{evento.descricao}}</h1>
-                <h1>{{evento.data}}</h1>
-                <h1>{{evento.cor}}</h1>
-                <button>Editar</button>
-                <button>Deletar</button>
+
+              <section class="header-card">
+
+                <div class="bar" @mousedown="mudarAltura()" @touchstart="mudarAltura()"></div>
+              
+                <button class="botao-fechar" @click="ocultarCard()">
+                  <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50">
+                  <path d="M 7.71875 6.28125 L 6.28125 7.71875 L 23.5625 25 L 6.28125 42.28125 L 7.71875 43.71875 L 25 26.4375 L 42.28125 43.71875 L 43.71875 42.28125 L 26.4375 25 L 43.71875 7.71875 L 42.28125 6.28125 L 25 23.5625 Z"></path>
+                  </svg>
+                </button>
+
+                <h2>Eventos no dia {{this.diaSelecionado}} de {{this.mesSelecionadoString}} de {{this.anoSelecionado}}</h2>
+
+                <button class="botao-adicionar" @click="adicionarEvento()">
+                  <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAACXBIWXMAAAsTAAALEwEAmpwYAAAASElEQVR4nGNgGFHg1NNnd2hqwemnz/+PWoAXnB4NoqEdRKefPLsCMoBi/OTZlYHxATHg9KgFhMDp0SAa+CB68uwyTS1gGJEAAIDBhAKVfQuZAAAAAElFTkSuQmCC" alt="plus-math">
+                </button>
+
               </section>
-              <h1>{{this.diaSelecionado}}</h1>
+
+              <section class="evento-card" v-for="evento in eventos" :key="evento.id" :style="{backgroundColor: evento.cor}">
+
+                <h1>{{evento.descricao}}</h1>
+
+                <section class="botoes">
+                  <button @click="atualizarEvento($event, evento.id)" class="botao-editar">
+                    <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
+                    <g fill-opacity="0" fill="#dddddd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,256v-256h256v256z" id="bgRectangle"></path></g><g fill="#f5f5f5" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M43.125,2c-1.24609,0 -2.48828,0.48828 -3.4375,1.4375l-0.8125,0.8125l6.875,6.875c-0.00391,0.00391 0.8125,-0.8125 0.8125,-0.8125c1.90234,-1.90234 1.89844,-4.97656 0,-6.875c-0.95312,-0.94922 -2.19141,-1.4375 -3.4375,-1.4375zM37.34375,6.03125c-0.22656,0.03125 -0.4375,0.14453 -0.59375,0.3125l-32.4375,32.46875c-0.12891,0.11719 -0.22656,0.26953 -0.28125,0.4375l-2,7.5c-0.08984,0.34375 0.01172,0.70703 0.26172,0.95703c0.25,0.25 0.61328,0.35156 0.95703,0.26172l7.5,-2c0.16797,-0.05469 0.32031,-0.15234 0.4375,-0.28125l32.46875,-32.4375c0.39844,-0.38672 0.40234,-1.02344 0.01563,-1.42187c-0.38672,-0.39844 -1.02344,-0.40234 -1.42187,-0.01562l-32.28125,32.28125l-4.0625,-4.0625l32.28125,-32.28125c0.30078,-0.28906 0.39063,-0.73828 0.22266,-1.12109c-0.16797,-0.38281 -0.55469,-0.62109 -0.97266,-0.59766c-0.03125,0 -0.0625,0 -0.09375,0z"></path></g></g>
+                    </svg>
+                  </button>
+
+                  <button @click="deletarEvento($event, evento.id)" class="botao-excluir">
+                      <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
+                      <g fill-opacity="0" fill="#dddddd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,256v-256h256v256z" id="bgRectangle"></path></g><g fill="#f5f5f5" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M24,4c-3.50831,0 -6.4296,2.62143 -6.91992,6h-6.8418c-0.08516,-0.01457 -0.17142,-0.02176 -0.25781,-0.02148c-0.07465,0.00161 -0.14908,0.00879 -0.22266,0.02148h-3.25781c-0.54095,-0.00765 -1.04412,0.27656 -1.31683,0.74381c-0.27271,0.46725 -0.27271,1.04514 0,1.51238c0.27271,0.46725 0.77588,0.75146 1.31683,0.74381h2.13867l2.51758,26.0293c0.27108,2.80663 2.65553,4.9707 5.47461,4.9707h14.73633c2.81922,0 5.20364,-2.16383 5.47461,-4.9707l2.51953,-26.0293h2.13867c0.54095,0.00765 1.04412,-0.27656 1.31683,-0.74381c0.27271,-0.46725 0.27271,-1.04514 0,-1.51238c-0.27271,-0.46725 -0.77588,-0.75146 -1.31683,-0.74381h-3.25586c-0.15912,-0.02581 -0.32135,-0.02581 -0.48047,0h-6.84375c-0.49032,-3.37857 -3.41161,-6 -6.91992,-6zM24,7c1.87916,0 3.42077,1.26816 3.86133,3h-7.72266c0.44056,-1.73184 1.98217,-3 3.86133,-3zM11.65039,13h24.69727l-2.49219,25.74023c-0.12503,1.29513 -1.18751,2.25977 -2.48828,2.25977h-14.73633c-1.29892,0 -2.36336,-0.96639 -2.48828,-2.25977zM20.47656,17.97852c-0.82766,0.01293 -1.48843,0.69381 -1.47656,1.52148v15c-0.00765,0.54095 0.27656,1.04412 0.74381,1.31683c0.46725,0.27271 1.04514,0.27271 1.51238,0c0.46725,-0.27271 0.75146,-0.77588 0.74381,-1.31683v-15c0.00582,-0.40562 -0.15288,-0.7963 -0.43991,-1.08296c-0.28703,-0.28666 -0.67792,-0.44486 -1.08353,-0.43852zM27.47656,17.97852c-0.82766,0.01293 -1.48843,0.69381 -1.47656,1.52148v15c-0.00765,0.54095 0.27656,1.04412 0.74381,1.31683c0.46725,0.27271 1.04514,0.27271 1.51238,0c0.46725,-0.27271 0.75146,-0.77588 0.74381,-1.31683v-15c0.00582,-0.40562 -0.15288,-0.7963 -0.43991,-1.08296c-0.28703,-0.28666 -0.67792,-0.44486 -1.08353,-0.43852z"></path></g></g>
+                      </svg>
+                  </button>
+
+                </section>
+
+              </section>
+
             </div>
 
           </div>
@@ -80,14 +120,20 @@
           <!-- formulario de resgistro e edição de evento -->
           <div v-if="mostrarFormulario" class="formulario">
 
-            <form enctype="multipart/form-data" @submit="isRegister == true ? registerEvento() : atualizarEvento()">
+            <button class="botao-fechar" @click="ocultarFormulario()">
+              <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50">
+              <path d="M 7.71875 6.28125 L 6.28125 7.71875 L 23.5625 25 L 6.28125 42.28125 L 7.71875 43.71875 L 25 26.4375 L 42.28125 43.71875 L 43.71875 42.28125 L 26.4375 25 L 43.71875 7.71875 L 42.28125 6.28125 L 25 23.5625 Z"></path>
+              </svg>
+            </button>
+
+            <form enctype="multipart/form-data" @submit="isRegister == true ? registrarEvento($event) : atualizarEvento($event)">
             
-              <div class="input-container">
+              <div class="input-container default">
                 <label for="descricao">Descrição do evento:</label>
                 <input type="text" name="descricao" id="descricao" v-model="descricao" placeholder="Descrição do evento" required>
               </div>
 
-              <div class="input-container" v-if="sempre == false">
+              <div class="input-container default" v-if="sempre == false">
                 <label for="quant">Por quantos anos se repete?</label>
                 <input type="number" name="quant" id="quant" v-model="quant" placeholder="Quantidade de anos" required>
               </div>
@@ -95,18 +141,29 @@
               <input type="hidden" name="data" id="data" v-model="data">
               <input type="hidden" name="ultimaData" id="ultimaData" v-model="ultima_data">
 
-              <div class="input-container">
+              <div class="input-container repeat">
                 <label for="sempre">Evento sempre se repete?</label>
                 <input type="checkbox" name="sempre" id="sempre" v-model="sempre">
               </div>
 
-              <div class="input-container">
-                <input type="color" name="cor" id="cor" v-model="cor" required>
+              <div class="input-container default">
+                
+                <label for="cores">Selecione uma Cor:</label>
+                <div id="cores" class="container-cores">
+
+                  <div  id="color01" class="selecionar-cor" @click="selecionarCor('#777783', 'color01')" style="background-color:#777783;"></div>
+                  <div id="color02" class="selecionar-cor" @click="selecionarCor('#3d7f63', 'color02')" style="background-color:#3d7f63;"></div>
+                  <div id="color03" class="selecionar-cor" @click="selecionarCor('#d33873', 'color03')" style="background-color:#d33873;"></div>
+                  <div id="color04" class="selecionar-cor" @click="selecionarCor('#c4d338', 'color04')" style="background-color:#c4d338;"></div>
+                  <div id="color05" class="selecionar-cor" @click="selecionarCor('#d33838', 'color05')" style="background-color:#d33838;"></div>
+
+                </div>
+
+                <input type="hidden" name="cor" id="cor" v-model="cor" required>
+
               </div>
 
-              <div class="input-container">
-                <button type="submit">{{isRegister == true ? "Cadastrar" : "Atualizar"}}</button>
-              </div>
+              <button class="input-submit" type="submit">{{isRegister == true ? "Cadastrar" : "Atualizar"}}</button>
 
             </form>
 
@@ -124,7 +181,6 @@
 
     </footer>
 
-
   </div>
 </template>
 
@@ -132,8 +188,14 @@
 
 /* 
 
-gerar estilos do calendario, card e formulario
-preparar pra receber a API
+- fazer estilos dos dias
+- fazer estilos de evento por card
+- fazer estilos do formularios
+- fazer estilos de tamanho de fonte por card
+
+-- fazer a versão pc ( faze verificalçao para realizar a função resize apenas para celulares )
+
+-- preparar pra receber a API
 
 */
 
@@ -157,11 +219,22 @@ export default {
       mesSelecionadoString: null,
       diaSelecionado: 0,
       eventos:[
-        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "azul"},
-        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "vermelho"},  
-        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "verde"},
+        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#3d7f63"},
+        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#777783"},  
+        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#00ff00"},
+        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#3d7f63"},
+        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#777783"},  
+        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#3d7f63"},
+        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#777783"},
+        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#c4d338"},  
+        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#c4d338"},
+        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#c4d338"},
+        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#c4d338"},  
+        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#00ff00"},
+        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#d33838"},
+        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#d33838"},  
+        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#d33838"},
       ],
-
 
       //variáveis de formulário
       descricao: null,
@@ -198,7 +271,20 @@ export default {
   },
   methods:{
 
+    selecionarCor(cor, id){
+
+      let classe = document.querySelectorAll('.selecionar-cor')
+      classe.forEach(element => {
+        element.style.border = "none"
+      });
+      let elemento = document.getElementById(id)
+      elemento.style.border = "2px solid #000"
+      this.cor = cor
+
+    },
+
     mudarAltura(){
+
       this.estaRedimencionando = true
       this.posicaoY = event.clientY
       document.addEventListener("mousemove", this.mudarAlturaCard )
@@ -231,8 +317,8 @@ export default {
 
     pararMudancaCard(){
       this.estaRedimencionando = false
-      document.removeEventListener("mousemove", this.mudarAlturaCard)
-      document.removeEventListener("mouseup", this.pararMudancaCard)
+      document.removeEventListener("mousemove", this.mudarAlturaCard);
+      document.removeEventListener("mouseup", this.pararMudancaCard);
       document.removeEventListener("touchmove", this.mudarAlturaCard);
       document.removeEventListener("touchend", this.pararMudancaCard);
     },
@@ -261,6 +347,23 @@ export default {
       }
     },
 
+    adicionarEvento(){
+      this.mostrarDia = false
+      this.mostrarFormulario = true
+      this.isRegister = true
+      this.descricao = null
+      this.data = null
+      this.ultima_data = null
+      this.sempre = true
+      this.cor = null
+      this.quant = 0
+    },
+
+    ocultarFormulario(){
+      this.mostrarFormulario = false
+      this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
+    }, 
+
     //procurar eventos por mes com base na escolha do usuário
     procurarEventosMes(mes, ano){
 
@@ -273,6 +376,21 @@ export default {
       this.mesSelecionadoString = this.mesString(mes)
       console.log(`${ano} ${mes} dias: ${this.contagemDia}`)
 
+    },
+
+    registrarEvento(e){
+      e.preventDefault()
+      console.log("evento adicionado")
+    },
+
+    atualizarEvento(e, id){
+      e.preventDefault()
+      console.log("evento atualizado")
+    },
+
+    deletarEvento(e, id){
+      e.preventDefault()
+      console.log("evento deletado")
     },
 
     ocultarCard(){
@@ -369,7 +487,7 @@ export default {
 .lista-anos{
   position: absolute;
   overflow: hidden;
-  top: 21px;
+  top: 0px;
   left: 87px;
   border-radius: 10px;  
   margin-top: 10px;
@@ -383,7 +501,7 @@ export default {
 .lista-meses{
   overflow: hidden;
   position: absolute;
-  top: 20px;
+  top: 0px;
   border-radius: 10px;  
   margin-top: 10px;
   background-color: var(--color-main03);
@@ -393,6 +511,22 @@ export default {
   display: block;
   padding: 6px 5px;
 } 
+
+.dia{
+  cursor: pointer;
+  user-select: none ;
+}
+
+.dia:hover{
+  box-shadow: 
+    0em 0em 0.7em #0000002d,
+    0em 0em 0.7em #e7e7e788 inset;
+  ;
+}
+
+.dia:active{
+  scale: 0.9;
+}
 
 .ano, .mes{
   color: #fff;
@@ -427,6 +561,65 @@ export default {
   margin-block: 7px;
   background-color: var(--color-main02);
   border-radius: 50%;
+}
+
+
+/* estilos do formulário */
+.formulario{
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--color-main00);
+  z-index: 1000;
+}
+
+.evento-card{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  color: var(--color-main00);
+  max-width: 90%;
+  min-width: 330px;
+  margin: auto;
+  padding: 10px;
+  margin-block: 10px;
+  border-radius: 30px;
+}
+
+.botoes{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.botoes > button{
+  outline: 0;
+  border: none;
+  padding: 3px 4px;
+  margin-block: 3px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.botoes > button:hover{
+  filter: saturate(0.9);
+}
+
+.botoes > button:active{
+  scale: 0.9;
+}
+
+.botao-editar{
+  background-color: rgb(47, 196, 255);
+  border-radius: 17px;
+}
+
+.botao-excluir{
+  background-color: rgb(255, 83, 83);
+  border-radius: 17px;
 }
 
 </style>
