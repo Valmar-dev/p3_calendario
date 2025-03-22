@@ -10,4 +10,3 @@ class Evento(models.Model):
         max_length=7,  # Exemplo: "#FFFFFF"
         validators=[RegexValidator(regex=r'^#(?:[0-9a-fA-F]{3}){1,2}$', message="Insira um código hexadecimal válido.")],
     )
-

@@ -7,6 +7,7 @@ from rest_framework import status
 from .models import Evento
 from .serializers import EventoSerializer
 
+# cadastro de eventos
 class EventoCadastro(APIView):  
     def post(self, request):
         serializer = EventoSerializer(data=request.data)  
@@ -20,3 +21,11 @@ class EventoCadastro(APIView):
             "message": "Erro ao cadastrar evento.",
             "errors": serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+# retornando dados do baco para o front
+class EventoList(APIView):
+    def get(self, request):
+        eventos = Evento.objects.all()  
+        serializer = EventoSerializer(eventos, many=True)
+        return Response(serializer.data)  # Retorno tudo em formato JSON
