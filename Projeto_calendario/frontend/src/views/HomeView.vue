@@ -53,18 +53,27 @@
             </li>
           </ul>
 
-          <div v-if="mostrarDia" class="dia-card">
+          <div v-if="mostrarDia" class="s">
+            <div class="background-card" @click="ocultarCard()"></div>
 
-            <button @click="ocultarCard()">fechar</button>
-            <h2>Eventos no dia {{this.diaSelecionado}} de {{this.mesSelecionadoString}} de {{this.anoSelecionado}}</h2>
-            <section v-for="evento in eventos" :key="evento.id">
-              <h1>{{evento.descricao}}</h1>
-              <h1>{{evento.data}}</h1>
-              <h1>{{evento.cor}}</h1>
-              <button>Editar</button>
-              <button>Deletar</button>
-            </section>
-            <h1>{{this.diaSelecionado}}</h1>
+            <div class="card" :style="{height: cardAltura + 'px'}">
+              <div class="bar" @mousedown="mudarAltura()" @touchstart="mudarAltura()"></div>
+              <!-- teste -->
+              <button class="botao-fechar" @click="ocultarCard()">
+                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0 0 50 50">
+                <path d="M 7.71875 6.28125 L 6.28125 7.71875 L 23.5625 25 L 6.28125 42.28125 L 7.71875 43.71875 L 25 26.4375 L 42.28125 43.71875 L 43.71875 42.28125 L 26.4375 25 L 43.71875 7.71875 L 42.28125 6.28125 L 25 23.5625 Z"></path>
+                </svg>
+              </button>
+              <h2>Eventos no dia {{this.diaSelecionado}} de {{this.mesSelecionadoString}} de {{this.anoSelecionado}}</h2>
+              <section v-for="evento in eventos" :key="evento.id">
+                <h1>{{evento.descricao}}</h1>
+                <h1>{{evento.data}}</h1>
+                <h1>{{evento.cor}}</h1>
+                <button>Editar</button>
+                <button>Deletar</button>
+              </section>
+              <h1>{{this.diaSelecionado}}</h1>
+            </div>
 
           </div>
 
@@ -166,6 +175,9 @@ export default {
       // variaveis de controle de exibição:
       mostrarFormulario: false,
       mostrarDia: false,
+      estaRedimencionando: false,
+      cardAltura: 350,
+      posicaoY: 0
 
     }
   },
@@ -185,6 +197,45 @@ export default {
 
   },
   methods:{
+
+    mudarAltura(){
+      this.estaRedimencionando = true
+      this.posicaoY = event.clientY
+      document.addEventListener("mousemove", this.mudarAlturaCard )
+      document.addEventListener("mouseup", this.pararMudancaCard)
+
+      document.addEventListener("touchmove", this.mudarAlturaCard )
+      document.addEventListener("touchend", this.pararMudancaCard)
+
+    },
+
+    mudarAlturaCard(evento){
+
+      evento.preventDefault()
+
+      if(!this.estaRedimencionando) return;
+
+      let padraoY = evento.type === "touchmove" ? evento.touches[0].clientY : evento.clientY
+      let diferenca = this.posicaoY - evento.clientY;
+      this.cardAltura += diferenca
+
+      if(this.cardAltura < 350){
+        this.cardAltura = 350
+      }
+
+      if(this.cardAltura > 600){
+        this.cardAltura = 600
+      }
+      this.posicaoY = padraoY
+    },
+
+    pararMudancaCard(){
+      this.estaRedimencionando = false
+      document.removeEventListener("mousemove", this.mudarAlturaCard)
+      document.removeEventListener("mouseup", this.pararMudancaCard)
+      document.removeEventListener("touchmove", this.mudarAlturaCard);
+      document.removeEventListener("touchend", this.pararMudancaCard);
+    },
 
     controleMenuMes(controle){
       if(this.exibirMenuMes == true){
@@ -222,6 +273,10 @@ export default {
       this.mesSelecionadoString = this.mesString(mes)
       console.log(`${ano} ${mes} dias: ${this.contagemDia}`)
 
+    },
+
+    ocultarCard(){
+      this.mostrarDia = false
     },
 
     //procurar eventos por dia com base na escolha do usuário
