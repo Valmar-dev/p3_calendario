@@ -2,27 +2,34 @@
   <div class="home-view">
     
     <header>
-      <section id="escolhaData">
-        <div id="mesEscolha">
-          <ul>
-            <li @click="procurarEventosMes(1, this.anoSelecionado)">Jan</li>
-            <li @click="procurarEventosMes(2, this.anoSelecionado)">Fev</li>
-            <li @click="procurarEventosMes(3, this.anoSelecionado)">Mar</li>
-            <li @click="procurarEventosMes(4, this.anoSelecionado)">Abr</li>
-            <li @click="procurarEventosMes(5, this.anoSelecionado)">Mai</li>
-            <li @click="procurarEventosMes(6, this.anoSelecionado)">Jun</li>
-            <li @click="procurarEventosMes(7, this.anoSelecionado)">Jul</li>
-            <li @click="procurarEventosMes(8, this.anoSelecionado)">Ago</li>
-            <li @click="procurarEventosMes(9, this.anoSelecionado)">Set</li>
-            <li @click="procurarEventosMes(10, this.anoSelecionado)">Out</li>
-            <li @click="procurarEventosMes(11, this.anoSelecionado)">Nov</li>
-            <li @click="procurarEventosMes(12, this.anoSelecionado)">Dez</li>
+      <section id="escolhaData" class="menu-suspenso">
+        <div id="mesEscolha" @mouseleave="controleMenuMes('ocultar')" @mouseenter="controleMenuMes(this.exibirMenuMes)" class="lista-escolha">
+
+          <ul class="lista-meses" >
+            <li id="headerMes" class="header-lista">Mês</li>
+            <div v-if="exibirMenuMes">
+              <li class="mes" @click="procurarEventosMes(1, this.anoSelecionado)">Janeiro</li>
+              <li class="mes" @click="procurarEventosMes(2, this.anoSelecionado)">Fevereiro</li>
+              <li class="mes" @click="procurarEventosMes(3, this.anoSelecionado)">Março</li>
+              <li class="mes" @click="procurarEventosMes(4, this.anoSelecionado)">Abril</li>
+              <li class="mes" @click="procurarEventosMes(5, this.anoSelecionado)">Maio</li>
+              <li class="mes" @click="procurarEventosMes(6, this.anoSelecionado)">Junho</li>
+              <li class="mes" @click="procurarEventosMes(7, this.anoSelecionado)">Julho</li>
+              <li class="mes" @click="procurarEventosMes(8, this.anoSelecionado)">Agosto</li>
+              <li class="mes" @click="procurarEventosMes(9, this.anoSelecionado)">Setembro</li>
+              <li class="mes" @click="procurarEventosMes(10, this.anoSelecionado)">Outubro</li>
+              <li class="mes" @click="procurarEventosMes(11, this.anoSelecionado)">Novembro</li>
+              <li class="mes" @click="procurarEventosMes(12, this.anoSelecionado)">Dezembro</li>
+            </div>
           </ul>
         </div>
-        <div id="anoEscolha">
+        <div id="anoEscolha" @mouseleave="controleMenuAno('ocultar')" @mouseenter="controleMenuAno(this.exibirMenuAno)" class="lista-escolha">
           <!-- loop para gerar os próximos 3 anos -->
-          <ul>
-            <li v-for="numero in 3" :key="numero" :id="`${this.anoAtual + numero}`" @click="procurarEventosMes(this.mesSelecionado, (this.anoAtual - 1 ) + numero)">{{(this.anoAtual - 1 ) + numero}}</li>
+          <ul class="lista-anos">
+            <li id="headerAno" class="header-lista">Ano</li>
+            <div  v-if="exibirMenuAno">
+              <li class="ano" v-for="numero in 3" :key="numero" :id="`${this.anoAtual + numero}`" @click="procurarEventosMes(this.mesSelecionado, (this.anoAtual - 1 ) + numero)">{{(this.anoAtual - 1 ) + numero}}</li>
+            </div>
           </ul>
         </div>
       </section>
@@ -32,10 +39,6 @@
         <h1>{{this.anoSelecionado}}</h1>
       </section>
 
-      <aside>
-        <p>Calendário</p>
-      </aside>
-
     </header>
 
     <main>
@@ -44,7 +47,7 @@
 
         <!-- display grid de 7 colunas -->
         <div id="diasMes">
-          <ul>
+          <ul class="diasSemana">
             <li class="dia" v-for="numero in this.contagemDia" :key="numero" @click="procurarEventosDia(numero, this.mesSelecionado)">
               {{numero}}
             </li>
@@ -134,6 +137,8 @@ export default {
     return {
 
       //variáveis de data:
+      exibirMenuMes: false,
+      exibirMenuAno: false,
       anoAtual: 2025,
       mesAtual: 3,
       diaAtual: 0,
@@ -149,7 +154,7 @@ export default {
       ],
 
 
-      //variáveis de formulário:
+      //variáveis de formulário
       descricao: null,
       data: null,
       ultima_data: null,
@@ -159,7 +164,7 @@ export default {
       quant: 0,
 
       // variaveis de controle de exibição:
-      mostrarFormulario: true,
+      mostrarFormulario: false,
       mostrarDia: false,
 
     }
@@ -181,8 +186,35 @@ export default {
   },
   methods:{
 
+    controleMenuMes(controle){
+      if(this.exibirMenuMes == true){
+        this.exibirMenuMes = false  
+      } else{
+        this.exibirMenuMes = true
+      }
+
+      if(controle == 'ocultar'){
+        this.exibirMenuAno = false
+      }
+    },
+
+    controleMenuAno(controle){
+      if(this.exibirMenuAno == true){
+        this.exibirMenuAno = false  
+      } else{
+        this.exibirMenuAno = true
+      }
+
+      if(controle == 'ocultar'){
+        this.exibirMenuAno = false
+      }
+    },
+
     //procurar eventos por mes com base na escolha do usuário
     procurarEventosMes(mes, ano){
+
+      this.exibirMenuAno = false
+      this.exibirMenuMes = false
 
       this.contagemDia = new Date(ano, mes, 0).getDate()
       this.anoSelecionado = ano
@@ -239,3 +271,107 @@ export default {
   }
 }
 </script>
+<style scoped>
+
+.menu-suspenso{
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  width: 30%;
+}
+
+.header-lista{
+  background-color: var(--color-main04);
+  color: var(--color-main00);
+  font-weight: bold;
+  display: block;
+  padding: 10px 7px;
+  border-radius: 10px 10px 0 0;
+}
+
+#headerMes{
+  width: 83px;
+}
+
+#headerAno{
+  width: 55px;
+  padding: 10px 8px;
+}
+
+.lista-escolha{
+  position: absolute;
+  margin: 0 10px 0 10px;
+  padding: 0;
+  background-color: var(--color-main02);
+}
+
+.lista-escolha ul{
+  list-style-type: none;
+  background-color: var(--color-main03);
+}
+
+.lista-anos{
+  position: absolute;
+  overflow: hidden;
+  top: 21px;
+  left: 87px;
+  border-radius: 10px;  
+  margin-top: 10px;
+  background-color: var(--color-main03);
+}
+
+.lista-anos li.ano{
+  padding: 5px 5px;
+}
+
+.lista-meses{
+  overflow: hidden;
+  position: absolute;
+  top: 20px;
+  border-radius: 10px;  
+  margin-top: 10px;
+  background-color: var(--color-main03);
+}
+
+.lista-meses li.mes{
+  display: block;
+  padding: 6px 5px;
+} 
+
+.ano, .mes{
+  color: #fff;
+}
+
+.ano:hover, .mes:hover{
+  background-attachment: fixed;
+  background-color: var(--color-main01);
+  color: var(--color-main03);
+}
+
+.diasSemana{
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background-color: var(--color-main01);
+  justify-items: center;
+  list-style-type: none;
+  max-width: 500px;
+  padding: 30px 0;
+  border-radius: 10px;
+  margin: auto;
+  margin-top: 50px;
+}
+
+.diasSemana li{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  height: 45px;
+  width: 45px;
+  margin-block: 7px;
+  background-color: var(--color-main02);
+  border-radius: 50%;
+}
+
+</style>
