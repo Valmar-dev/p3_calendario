@@ -199,6 +199,8 @@
 
 */
 
+import {BASE_URL} from '@/config'
+
 export default {
   name: 'HomeView',
   components: {
@@ -206,6 +208,9 @@ export default {
   },
   data(){
     return {
+
+      //variaveis de ambiente
+      apiURL: BASE_URL,
 
       //variáveis de data:
       exibirMenuMes: false,
@@ -218,23 +223,7 @@ export default {
       mesSelecionado:0,
       mesSelecionadoString: null,
       diaSelecionado: 0,
-      eventos:[
-        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#3d7f63"},
-        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#777783"},  
-        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#00ff00"},
-        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#3d7f63"},
-        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#777783"},  
-        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#3d7f63"},
-        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#777783"},
-        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#c4d338"},  
-        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#c4d338"},
-        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#c4d338"},
-        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#c4d338"},  
-        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#00ff00"},
-        {id: 1, descricao: "Evento 1", data: "2025-03-01", cor: "#d33838"},
-        {id: 2, descricao: "Evento 2", data: "2025-03-01", cor: "#d33838"},  
-        {id: 3, descricao: "Evento 3", data: "2025-03-01", cor: "#d33838"},
-      ],
+      eventos:[],
 
       //variáveis de formulário
       descricao: null,
@@ -378,8 +367,32 @@ export default {
 
     },
 
-    registrarEvento(e){
+    async registrarEvento(e){
       e.preventDefault()
+
+      const data = {
+        descricao: this.descricao,
+        data: `${this.anoSelecionado}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+        ultima_data: `${this.anoSelecionado + this.quant}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+        sempre: this.sempre,
+        cor: this.cor
+      }
+
+      const jsonData = JSON.stringify(data)
+      console.log(jsonData)
+
+      await fetch(`${this.apiURL}/cadastro/`, {
+        method:"POST",
+        headers:{
+          "Content-type":"application/json"
+        },
+        body: jsonData
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        console.log(data)
+      })
+
       console.log("evento adicionado")
     },
 
@@ -398,12 +411,23 @@ export default {
     },
 
     //procurar eventos por dia com base na escolha do usuário
-    procurarEventosDia(dia, mes){
+    async procurarEventosDia(dia, mes){
 
       this.diaSelecionado = dia
       this.mesSelecionado = mes
       this.mostrarDia = true
       console.log(`${dia} ${mes}`)
+
+      await fetch(`${this.apiURL}/eventos/?mes=${String(mes).padStart(2, "0")}&dia=${String(dia).padStart(2, "0")}`, {
+        method:"GET",
+        headers:{
+          "Coontent-type":"application/json"
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        console.log(data)
+      })
 
     },
 

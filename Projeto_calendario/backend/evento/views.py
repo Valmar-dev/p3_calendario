@@ -27,13 +27,29 @@ class EventoCadastro(APIView):
 # Retornando dados do baco para o front. Método GET
 class EventoList(APIView):
     def get(self, request):
-        mes = request.GET.get("mes") # Armazenando o valor do mês passado como parametro
-        dia = request.GET.get("dia") # Armazenando o valor do dia padda como parametro
+        # Pega os parâmetros mes e dia da query string
+        mes = request.GET.get("mes")
+        dia = request.GET.get("dia")
+
         if not mes or not dia:
-            return Response({"message": "Informe 'mes' e 'dia' como parâmetros na URL."}, status = 400)
-        eventos = Evento.objects.filter(data__month= mes, data__day = dia) # Filtrando o evento do banco de acordo com o dia e o mês
+            return Response({"message": "Informe 'mes' e 'dia' como parâmetros na URL."}, status=400)
+        
+        try:
+            # Converte mes e dia para inteiros
+            mes = int(mes)
+            dia = int(dia)
+        except ValueError:
+            return Response({"message": "Os parâmetros 'mes' e 'dia' devem ser números inteiros."}, status=400)
+
+        # Filtra os eventos de acordo com o mês e o dia
+        eventos = Evento.objects.filter(data__month=mes, data__day=dia)
+
+        # Serializa os eventos encontrados
         serializer = EventoSerializer(eventos, many=True)
-        return Response(serializer.data)  # Retorno tudo em formato JSON
+        
+        return Response(serializer.data)  # Retorna a lista de eventos em formato JSON
+
+
     
 
 # Fução para deletar. Método DELETE
