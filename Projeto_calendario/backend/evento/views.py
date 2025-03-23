@@ -7,6 +7,7 @@ from rest_framework import status
 from .models import Evento
 from .serializers import EventoSerializer
 from rest_framework.exceptions import NotFound
+from django.shortcuts import get_object_or_404
 
 # Cadastro de eventos. Método POST
 class EventoCadastro(APIView):  
@@ -59,3 +60,10 @@ class EventoUpdate(APIView):
             serializer.save()  # Salva as atualizações
             return Response({"message": "Evento atualizado com sucesso!", "evento": serializer.data}, status=status.HTTP_200_OK) # Mensagem de que confirmação
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
+
+# Função para GET para receber apenas um evento
+class EventoDetail(APIView):
+    def get(self, request, id):
+        evento = get_object_or_404(Evento, id=id)  # Busca evento pelo ID ou retorna 404
+        serializer = EventoSerializer(evento)
+        return Response(serializer.data, status=status.HTTP_200_OK)
