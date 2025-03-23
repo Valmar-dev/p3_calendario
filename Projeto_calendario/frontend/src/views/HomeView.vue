@@ -1,6 +1,10 @@
 <template>
   <div class="home-view">
     
+    <div id="message" v-if="message">
+      <p class="p-message">{{this.message}}</p>
+    </div>
+
     <header>
 
       <section id="escolhaData" class="menu-suspenso">
@@ -127,6 +131,8 @@
             </button>
 
             <form enctype="multipart/form-data" @submit="isRegister == true ? registrarEvento($event) : atualizarEvento($event)">
+
+              <input type="hidden" name="id" id="id" v-model="id">
             
               <div class="input-container default">
                 <label for="descricao">Descrição do evento:</label>
@@ -226,6 +232,7 @@ export default {
       eventos:[],
 
       //variáveis de formulário
+      id: null,
       descricao: null,
       data: null,
       ultima_data: null,
@@ -233,6 +240,7 @@ export default {
       cor: null,
       isRegister: true,
       quant: 0,
+      message: null,
 
       // variaveis de controle de exibição:
       mostrarFormulario: false,
@@ -339,13 +347,7 @@ export default {
     adicionarEvento(){
       this.mostrarDia = false
       this.mostrarFormulario = true
-      this.isRegister = true
-      this.descricao = null
-      this.data = null
-      this.ultima_data = null
-      this.sempre = true
-      this.cor = null
-      this.quant = 0
+      this.limparFomulario()
     },
 
     ocultarFormulario(){
@@ -368,46 +370,115 @@ export default {
     },
 
     async registrarEvento(e){
-      e.preventDefault()
 
-      const data = {
-        descricao: this.descricao,
-        data: `${this.anoSelecionado}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
-        ultima_data: `${this.anoSelecionado + this.quant}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
-        sempre: this.sempre,
-        cor: this.cor
+      e.preventDefault()
+      var data = {}
+      var jsonData = "" 
+      if(this.isRegister){
+
+        data = {
+          descricao: this.descricao,
+          data: `${this.anoSelecionado}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          ultima_data: `${this.anoSelecionado + this.quant}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          sempre: this.sempre,
+          cor: this.cor
+        }
+
+        jsonData = JSON.stringify(data)
+
+        await fetch(`${this.apiURL}/cadastro/`, {
+          method:"POST",
+          headers:{
+            "Content-type":"application/json"
+          },
+          body: jsonData
+        })
+        .then(resp => resp.json())
+        .then(data => {
+
+          this.message = data.message
+          setTimeout(() => {
+            
+            this.message = null
+            this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
+            this.mostrarFormulario = false
+            this.mostrarDia = true
+            this.limparFomulario()
+
+          }, 1200);
+
+        })
+
+      } else {
+
+        data = {
+          id: this.id,
+          descricao: this.descricao,
+          data: `${this.anoSelecionado}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          ultima_data: `${this.anoSelecionado + this.quant}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          sempre: this.sempre,
+          cor: this.cor
+        }
+       
+        jsonData = JSON.stringify(data)
+
+        await fetch(`${this.apiURL}/update/${this.id}/`, {
+          method:"PUT",
+          headers:{
+            "Content-type":"application/json"
+          },
+          body: jsonData
+        })
+        .then(resp => resp.json())
+        .then(data => {
+
+          this.message = data.message
+          setTimeout(() => {
+            
+            this.message = null
+            this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
+            this.mostrarFormulario = false
+            this.mostrarDia = true
+            this.limparFomulario()
+
+          }, 1200);
+
+        })
+
       }
 
-      const jsonData = JSON.stringify(data)
-      console.log(jsonData)
-
-      await fetch(`${this.apiURL}/cadastro/`, {
-        method:"POST",
-        headers:{
-          "Content-type":"application/json"
-        },
-        body: jsonData
-      })
-      .then(resp => resp.json())
-      .then(data => {
-        console.log(data)
-      })
-
-      console.log("evento adicionado")
     },
 
     atualizarEvento(e, id){
+      
       e.preventDefault()
-      console.log("evento atualizado")
+      console.log(id, "teste")
+      this.mostrarFormulario = true
+      this.mostrarDia = false
+      this.isRegister = false
+
     },
 
-    deletarEvento(e, id){
+    async deletarEvento(e, id){
       e.preventDefault()
-      console.log("evento deletado")
+      await fetch(`${this.apiURL}/delete/${id}/`, {
+        method:"DELETE",
+        headers:{
+          "Content-type":"application/json"
+        }
+      })
+      .then(resp => resp.json)
+      .then(data => {
+        console.log(data)
+        this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
+      })
+      
     },
 
     ocultarCard(){
+
       this.mostrarDia = false
+
     },
 
     //procurar eventos por dia com base na escolha do usuário
@@ -416,23 +487,20 @@ export default {
       this.diaSelecionado = dia
       this.mesSelecionado = mes
       this.mostrarDia = true
-      console.log(`${dia} ${mes}`)
 
       await fetch(`${this.apiURL}/eventos/?mes=${String(mes).padStart(2, "0")}&dia=${String(dia).padStart(2, "0")}`, {
         method:"GET",
         headers:{
-          "Coontent-type":"application/json"
+          "Content-type":"application/json"
         }
       })
       .then(resp => resp.json())
       .then(data => {
-        console.log(data)
+
+        this.eventos = data
+
       })
 
-    },
-
-    ocultarCard(){
-      this.mostrarDia = false
     },
 
     // coleta o numero do mes e retorna o nome do mes por extenso
@@ -463,6 +531,18 @@ export default {
         case 12:
           return "Dezembro"
       }
+    },
+
+    limparFomulario(){
+      this.id = null,
+      this.descricao = null,
+      this.data = null,
+      this.ultima_data = null,
+      this.sempre = true,
+      this.cor = null,
+      this.isRegister = true,
+      this.quant = 0,
+      this.message = null
     }
 
   }
