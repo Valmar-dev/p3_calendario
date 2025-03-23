@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-
+# Adicionei a habilitação de cors
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
