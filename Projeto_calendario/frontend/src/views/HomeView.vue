@@ -411,12 +411,23 @@ export default {
     },
 
     //procurar eventos por dia com base na escolha do usuário
-    procurarEventosDia(dia, mes){
+    async procurarEventosDia(dia, mes){
 
       this.diaSelecionado = dia
       this.mesSelecionado = mes
       this.mostrarDia = true
       console.log(`${dia} ${mes}`)
+
+      await fetch(`${this.apiURL}/eventos/?mes=${String(mes).padStart(2, "0")}&dia=${String(dia).padStart(2, "0")}`, {
+        method:"GET",
+        headers:{
+          "Coontent-type":"application/json"
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        console.log(data)
+      })
 
     },
 
