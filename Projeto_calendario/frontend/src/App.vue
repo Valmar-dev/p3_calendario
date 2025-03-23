@@ -52,6 +52,27 @@ nav a.router-link-exact-active {
   color: #42b983;
 }
 
+#message{
+  position: fixed;
+  display: block;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  padding: 10px;
+  color: var(--color-main00);
+  background: var(--color-main03);
+  border-radius: 15px;
+  z-index: 1004;
+  animation: born 0.4s ease-in-out both;
+}
+
+@keyframes born {
+  to{
+    top: 20px;
+  }
+}
+
 header{
   padding: 14px 0;
   display: flex;
