@@ -1,7 +1,10 @@
 # evento/urls.py
 from django.urls import path
-from .views import EventoList
+from .views import EventoCadastro, EventoList, EventoDelete, EventoUpdate
 
 urlpatterns = [
-    path('mensal/', EventoList.as_view(), name='evento-list'),  # Alterei o caminho para apenas '/mensal/'
+    path('cadastro/', EventoCadastro.as_view(), name='evento-cadastro'),
+    path('eventos/', EventoList.as_view(), name='retorna-eventos'),
+    path('delete/<int:pk>/', EventoDelete.as_view(), name='deleta-eventos'),
+    path('update/<int:pk>/', EventoUpdate.as_view(), name='atualiza-eventos'),
 ]
