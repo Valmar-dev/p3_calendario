@@ -8,7 +8,7 @@ from .models import Evento
 from .serializers import EventoSerializer
 from rest_framework.exceptions import NotFound
 
-# cadastro de eventos
+# Cadastro de eventos. Método POST
 class EventoCadastro(APIView):  
     def post(self, request):
         serializer = EventoSerializer(data=request.data)  
@@ -24,7 +24,7 @@ class EventoCadastro(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
-# retornando dados GET do baco para o front
+# Retornando dados do baco para o front. Método GET
 class EventoList(APIView):
     def get(self, request):
         eventos = Evento.objects.all()  
@@ -32,12 +32,26 @@ class EventoList(APIView):
         return Response(serializer.data)  # Retorno tudo em formato JSON
     
 
-# função DELETE
+# Fução para deletar. Método DELETE
 class EventoDelete(APIView):
     def delete(self, request, pk):
         try:
             evento = Evento.objects.get(id=pk)  # Busca o evento pelo id
             evento.delete()  # Deleta o evento
-            return Response({"message": "Evento deletado com sucesso!"}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"message": "Evento deletado com sucesso!"}, status=status.HTTP_204_NO_CONTENT) # Mensagem de confirmação
         except Evento.DoesNotExist:
             raise NotFound(detail="Evento não encontrado")
+
+# Função para atualizar. Método PUT
+class EventoUpdate(APIView):
+    def put(self, request, pk):
+        try:
+            evento = Evento.objects.get(pk=pk)  # Encontra o evento através id (pk)
+        except Evento.DoesNotExist:
+            return Response({"error": "Evento não encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = EventoSerializer(evento, data=request.data)  # Atualiza com os dados enviados no corpo da requisição
+        if serializer.is_valid():
+            serializer.save()  # Salva as atualizações
+            return Response({"message": "Evento atualizado com sucesso!", "evento": serializer.data}, status=status.HTTP_200_OK) # Mensagem de que confirmação
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 
