@@ -27,7 +27,11 @@ class EventoCadastro(APIView):
 # Retornando dados do baco para o front. Método GET
 class EventoList(APIView):
     def get(self, request):
-        eventos = Evento.objects.all()  
+        mes = request.GET.get("mes") # Armazenando o valor do mês passado como parametro
+        dia = request.GET.get("dia") # Armazenando o valor do dia padda como parametro
+        if not mes or not dia:
+            return Response({"message": "Informe 'mes' e 'dia' como parâmetros na URL."}, status = 400)
+        eventos = Evento.objects.filter(data__month= mes, data__day = dia) # Filtrando o evento do banco de acordo com o dia e o mês
         serializer = EventoSerializer(eventos, many=True)
         return Response(serializer.data)  # Retorno tudo em formato JSON
     
