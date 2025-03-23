@@ -83,3 +83,23 @@ class EventoDetail(APIView):
         evento = get_object_or_404(Evento, id=id)  # Busca evento pelo ID ou retorna 404
         serializer = EventoSerializer(evento)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+# Funão para buscar apenas o mes e ano GET
+class EventoMensal(APIView):
+    def get(self, request):
+        ano = request.GET.get("ano")
+        mes = request.GET.get("mes")
+
+        if not ano or not mes:
+            return Response({"message": "Os parâmetros 'ano' e 'mes' são obrigatórios."}, status=400)
+
+        try:
+            ano = int(ano)
+            mes = int(mes)
+        except ValueError:
+            return Response({"message": "Os parâmetros 'ano' e 'mes' devem ser números inteiros."}, status=400)
+        eventos = Evento.objects.filter(data__year=ano, data__month=mes)
+        if not eventos.exists():
+            return Response({"message": "Nenhum evento encontrado para esse mês."}, status=404)
+        serializer = EventoSerializer(eventos, many=True)
+        return Response(serializer.data)  # Retorna a lista de eventos no formato JSON
