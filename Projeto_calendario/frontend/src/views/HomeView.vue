@@ -710,7 +710,6 @@ export default {
   border-radius: 10px;
   margin: auto;
   margin-top: 50px;
-  z-index: 2;
 }
 
 .diasSemana li{
@@ -723,7 +722,6 @@ export default {
   margin-block: 7px;
   background-color: var(--color-main02);
   border-radius: 50%;
-  z-index: 3;
 }
 
 .indicador{
