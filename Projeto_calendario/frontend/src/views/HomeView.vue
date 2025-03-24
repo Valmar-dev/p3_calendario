@@ -68,6 +68,10 @@
 
             <li class="dia" v-for="numero in this.contagemDia" :key="numero" @click="procurarEventosDia(numero, this.mesSelecionado)">
               {{numero}}
+              <span
+                class="indicador"
+                v-if="eventosMensal.datasIniciais.includes(numero)"
+              ></span>
             </li>
 
           </ul>
@@ -230,6 +234,13 @@ export default {
       mesSelecionadoString: null,
       diaSelecionado: 0,
       eventos:[],
+      eventoMensal: [],
+      eventosMensal: {
+        datasIniciais: [],
+        datasFinais: [],
+        sempre:[],
+        cores:[]
+      },
 
       //variáveis de formulário
       id: null,
@@ -264,6 +275,7 @@ export default {
     this.mesSelecionadoString = this.mesString(this.mesSelecionado)
     this.diaSelecionado = this.diaAtual
     this.contagemDia = new Date(this.anoAtual, this.mesSelecionado, 0).getDate()
+    this.procurarEventosMes(this.mesAtual, this.anoAtual)
 
   },
   methods:{
@@ -356,16 +368,60 @@ export default {
     }, 
 
     //procurar eventos por mes com base na escolha do usuário
-    procurarEventosMes(mes, ano){
+    async procurarEventosMes(mes, ano){
 
       this.exibirMenuAno = false
       this.exibirMenuMes = false
+      this.eventosMensal.datasIniciais = []
+      this.eventosMensal.datasFinais = []
+      this.eventosMensal.sempre = [],
+      this.eventosMensal.cores = []
 
       this.contagemDia = new Date(ano, mes, 0).getDate()
       this.anoSelecionado = ano
       this.mesSelecionado = mes
       this.mesSelecionadoString = this.mesString(mes)
       console.log(`${ano} ${mes} dias: ${this.contagemDia}`)
+
+      await fetch(`${this.apiURL}/eventos/mensal/?ano=${ano}&mes=${String(mes).padStart(2, "0")}`, {
+        method:"GET",
+        headers: {
+          "Content-type":"application/json"
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        console.log(data)
+        if(data.message){
+
+          this.message = data.message
+
+        } else {
+
+          this.eventoMensal = data
+
+          let day = ""
+
+          for (let i = 0; i < data.length; i++) {
+            day = new Date(data[i].data)
+            day = day.getUTCDate()
+            this.eventosMensal.datasIniciais.push(day)
+            this.eventosMensal.datasFinais.push(data[i].ultima_data)
+            this.eventosMensal.sempre.push(data[i].sempre)
+            this.eventosMensal.cores.push(data[i].cor)
+
+          }
+
+          console.log(this.eventosMensal);
+          
+
+        }
+
+        setTimeout(() => {
+          this.message = null
+        }, 1700);
+
+      })
 
     },
 
@@ -478,6 +534,7 @@ export default {
     ocultarCard(){
 
       this.mostrarDia = false
+      this.procurarEventosMes(this.mesSelecionado, this.anoSelecionado)
 
     },
 
@@ -653,6 +710,7 @@ export default {
   border-radius: 10px;
   margin: auto;
   margin-top: 50px;
+  z-index: 2;
 }
 
 .diasSemana li{
@@ -665,6 +723,15 @@ export default {
   margin-block: 7px;
   background-color: var(--color-main02);
   border-radius: 50%;
+  z-index: 3;
+}
+
+.indicador{
+  position: absolute;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  border: 3px solid var(--color-main04);
 }
 
 
