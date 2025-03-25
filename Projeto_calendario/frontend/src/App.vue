@@ -2,6 +2,16 @@
   <router-view/>
 </template>
 
+<script>
+import { solicitarPermissao } from "./firebase";
+
+export default {
+  mounted() {
+    
+  },
+};
+</script>
+
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -15,9 +25,9 @@
 
   --color-main00:#f5f5f5;
   --color-main01:#cbe5e7;
-  --color-main02:#7fcec3;
-  --color-main03:#289482;
-  --color-main04:#165e52;
+  --color-main02:#9cced1;
+  --color-main03:#497a96;
+  --color-main04:#16415e;
 
   --color-event00:#777783;
   --color-event01:#3d7f63;
@@ -52,6 +62,27 @@ nav a.router-link-exact-active {
   color: #42b983;
 }
 
+#message{
+  position: fixed;
+  display: block;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  padding: 10px;
+  color: var(--color-main00);
+  background: var(--color-main03);
+  border-radius: 15px;
+  z-index: 1004;
+  animation: born 0.4s ease-in-out both;
+}
+
+@keyframes born {
+  to{
+    top: 20px;
+  }
+}
+
 header{
   padding: 14px 0;
   display: flex;
@@ -68,8 +99,9 @@ section#dataEscolhida{
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-left: 150px;
+  margin-left: 170px;
   margin-top: 15px;
+  font-size: clamp(1.125rem, 0.8947rem + 1.0526vw, 1.75rem);
 }
 
 .home-view{
@@ -127,6 +159,7 @@ section#dataEscolhida{
   background-color: var(--color-main04);
   border-radius: 10px;
   z-index: 1003;
+  cursor: move;
 }
   
 .bar:active{
@@ -289,6 +322,15 @@ footer{
   background-color: var(--color-main01);
   padding: 3px 0;
   z-index: 1002;
+  cursor: default;
+}
+
+
+/* configurações para tablet */
+@media (width >= 480px) {
+  section#dataEscolhida{
+    margin-left: 0;
+  }
 }
 
 </style>
