@@ -7,9 +7,9 @@
 
     <header>
 
-      <section id="escolhaData" class="menu-suspenso">
+      <section id="escolhaData" class="menu-suspenso" @mouseleave="controleMenuMes('ocultar'),controleMenuAno('ocultar')">
 
-        <div id="mesEscolha" @mouseleave="controleMenuMes('ocultar')" @mouseenter="controleMenuMes(this.exibirMenuMes)" class="lista-escolha">
+        <div id="mesEscolha" @click="controleMenuMes(this.exibirMenuMes)" class="lista-escolha">
 
           <ul class="lista-meses" >
             <li id="headerMes" class="header-lista">Mês</li>
@@ -33,7 +33,7 @@
 
         </div>
 
-        <div id="anoEscolha" @mouseleave="controleMenuAno('ocultar')" @mouseenter="controleMenuAno(this.exibirMenuAno)" class="lista-escolha">
+        <div id="anoEscolha" @click="controleMenuAno(this.exibirMenuAno)" class="lista-escolha">
           <!-- loop para gerar os próximos 3 anos -->
           <ul class="lista-anos">
 
@@ -70,7 +70,7 @@
               {{numero}}
               <span
                 class="indicador"
-                v-if="eventosMensal.datasIniciais.includes(numero)"
+                v-if="eventosSempreFalse.datasIniciais.includes(numero) || eventosSempre.datasFinais.includes(numero)"
               ></span>
             </li>
 
@@ -134,7 +134,7 @@
               </svg>
             </button>
 
-            <form enctype="multipart/form-data" @submit="isRegister == true ? registrarEvento($event) : atualizarEvento($event)">
+            <form enctype="multipart/form-data" @submit="isRegister == true ? registrarEvento($event) : registrarEvento($event)">
 
               <input type="hidden" name="id" id="id" v-model="id">
             
@@ -235,7 +235,15 @@ export default {
       diaSelecionado: 0,
       eventos:[],
       eventoMensal: [],
-      eventosMensal: {
+      eventosSempreFalse: {
+        descricoes: [],
+        datasIniciais: [],
+        datasFinais: [],
+        sempre:[],
+        cores:[]
+      },
+      eventosSempre: {  
+        descricoes: [],      
         datasIniciais: [],
         datasFinais: [],
         sempre:[],
@@ -340,7 +348,7 @@ export default {
       }
 
       if(controle == 'ocultar'){
-        this.exibirMenuAno = false
+        this.exibirMenuMes = false
       }
     },
 
@@ -364,6 +372,7 @@ export default {
 
     ocultarFormulario(){
       this.mostrarFormulario = false
+      this.limparFomulario()
       this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
     }, 
 
@@ -372,10 +381,17 @@ export default {
 
       this.exibirMenuAno = false
       this.exibirMenuMes = false
-      this.eventosMensal.datasIniciais = []
-      this.eventosMensal.datasFinais = []
-      this.eventosMensal.sempre = [],
-      this.eventosMensal.cores = []
+      this.eventosSempreFalse.descricoes = []
+      this.eventosSempreFalse.datasIniciais = []
+      this.eventosSempreFalse.datasFinais = []
+      this.eventosSempreFalse.sempre = []
+      this.eventosSempreFalse.cores = []
+
+      this.eventosSempre.descricoes = []
+      this.eventosSempre.datasIniciais = []
+      this.eventosSempre.datasFinais = []
+      this.eventosSempre.sempre = []
+      this.eventosSempre.cores = []
 
       this.contagemDia = new Date(ano, mes, 0).getDate()
       this.anoSelecionado = ano
@@ -403,16 +419,34 @@ export default {
           let day = ""
 
           for (let i = 0; i < data.length; i++) {
-            day = new Date(data[i].data)
-            day = day.getUTCDate()
-            this.eventosMensal.datasIniciais.push(day)
-            this.eventosMensal.datasFinais.push(data[i].ultima_data)
-            this.eventosMensal.sempre.push(data[i].sempre)
-            this.eventosMensal.cores.push(data[i].cor)
+              
+            if(data[i].sempre == false){
+              day = new Date(data[i].data)
+              day = day.getUTCDate()
+              this.eventosSempreFalse.descricoes.push(data[i].descricao)
+              this.eventosSempreFalse.datasIniciais.push(day)
+              this.eventosSempreFalse.datasFinais.push(data[i].ultima_data)
+              this.eventosSempreFalse.sempre.push(data[i].sempre)
+              this.eventosSempreFalse.cores.push(data[i].cor)
+            }
 
           }
 
-          console.log(this.eventosMensal);
+          for (let i = 0; i < data.length; i++) {
+              
+            if(data[i].sempre == true){
+              day = new Date(data[i].ultima_data)
+              day = day.getUTCDate()
+              this.eventosSempre.descricoes.push(data[i].descricao)
+              this.eventosSempre.datasIniciais.push(data[i].data)
+              this.eventosSempre.datasFinais.push(day)
+              this.eventosSempre.sempre.push(data[i].sempre)
+              this.eventosSempre.cores.push(data[i].cor)
+            }
+
+          }
+
+          console.log(this.eventosSempre);
           
 
         }
@@ -505,13 +539,57 @@ export default {
 
     },
 
-    atualizarEvento(e, id){
+    async atualizarEvento(e, id){
       
       e.preventDefault()
       console.log(id, "teste")
       this.mostrarFormulario = true
       this.mostrarDia = false
       this.isRegister = false
+
+      await fetch(`${this.apiURL}/unicoevento/${id}/`, {
+        method:"GET",
+        headers: {
+          "Content-type":"application/json"
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+        if(data.message){
+          this.message = data.message
+        }else {
+
+          this.id = id
+          this.descricao = data.descricao
+          this.data = data.data 
+          this.ultima_data = data.ultima_data
+          this.sempre = data.sempre
+          this.cor = data.cor
+
+          switch (data.cor) {
+            case '#777783':
+                this.selecionarCor('#777783', 'color01')
+                break
+            case '#3d7f63':
+                this.selecionarCor('#3d7f63', 'color02')
+                break;
+            case '#d33873':
+                this.selecionarCor('#d33873', 'color03')
+                break
+            case '#c4d338':
+                  this.selecionarCor('#c4d338', 'color04')
+            case '#d33838':
+                this.selecionarCor('#d33838', 'color05')
+                break;
+          }
+
+        }
+
+        setTimeout(() => {
+          this.message = null
+        }, 1500);
+
+      })
 
     },
 
@@ -613,6 +691,8 @@ export default {
   display: flex;
   flex-direction: row;
   width: 30%;
+  user-select: none;
+  cursor: pointer;
 }
 
 .header-lista{
@@ -681,7 +761,7 @@ export default {
 .dia:hover{
   box-shadow: 
     0em 0em 0.7em #0000002d,
-    0em 0em 0.7em #e7e7e788 inset;
+    0em 0em 0.7em #13131371 inset;
   ;
 }
 
@@ -702,14 +782,13 @@ export default {
 .diasSemana{
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background-color: var(--color-main01);
   justify-items: center;
   list-style-type: none;
   max-width: 500px;
   padding: 30px 0;
   border-radius: 10px;
   margin: auto;
-  margin-top: 50px;
+  margin-top: 30px;
 }
 
 .diasSemana li{
@@ -717,19 +796,23 @@ export default {
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 45px;
-  width: 45px;
+  height: 58px;
+  width: 58px;
   margin-block: 7px;
-  background-color: var(--color-main02);
+  background-color: var(--color-main04);
   border-radius: 50%;
+  letter-spacing: 1px;
+  color: var(--color-main00);
+  font-weight: bold;
+  font-size: 1.3em;
 }
 
 .indicador{
   position: absolute;
-  width: 45px;
-  height: 45px;
+  width: 59px;
+  height: 59px;
   border-radius: 50%;
-  border: 3px solid var(--color-main04);
+  border: 3px solid rgb(0, 247, 255);
 }
 
 
@@ -749,10 +832,11 @@ export default {
   justify-content: space-around;
   align-items: center;
   color: var(--color-main00);
-  max-width: 90%;
+  width: 90%;
+  max-width: 500px;
   min-width: 330px;
   margin: auto;
-  padding: 10px;
+  padding: 5px;
   margin-block: 10px;
   border-radius: 30px;
 }
