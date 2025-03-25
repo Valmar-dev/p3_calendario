@@ -51,7 +51,7 @@ class EventoList(APIView):
             return Response({"message": "Os parâmetros 'mes' e 'dia' devem ser números inteiros."}, status=400)
 
         # Filtra os eventos de acordo com o mês e o dia
-        eventos = Evento.objects.filter(ultima_data__month=mes, ultima_data__day=dia)
+        eventos = Evento.objects.filter(data__month=mes, data__day=dia)
 
         # Serializa os eventos encontrados
         serializer = EventoSerializer(eventos, many=True)
@@ -63,8 +63,9 @@ class EventoSempre(APIView):
     def get(self, request):
         # Pega os parâmetros mês e ano da query string
         mes = request.GET.get("mes")
+        ano = request.GET.get("ano")
 
-        if not mes:
+        if not mes or not ano:
             return Response({"message": "Informe 'mes' e 'ano' como parâmetros na URL."}, status=400)
         
         try:
@@ -74,11 +75,23 @@ class EventoSempre(APIView):
             return Response({"message": "Os parâmetros 'mes' e 'ano' devem ser números inteiros."}, status=400)
 
         # Filtra apenas os eventos que têm 'sempre=True'
-        eventos = Evento.objects.filter(sempre=True, data__month=mes)
+        eventos = Evento.objects.filter(sempre=True)
 
-        serializer = EventoSerializer(eventos, many=True)
-        
-        return Response(serializer.data)
+        # Atualiza a data dos eventos para o ano e mês selecionado, mantendo o dia original
+        eventos_modificados = []
+        for evento in eventos:
+            data_original = evento.data
+            nova_data = data_original.replace(year=ano, month=mes)
+            evento_modificado = {
+                "id": evento.id,
+                "descricao": evento.descricao,
+                "data": nova_data.strftime("%Y-%m-%d"),
+                "ultima_data": evento.ultima_data.strftime("%Y-%m-%d") if evento.ultima_data else None,
+                "sempre": evento.sempre
+            }
+            eventos_modificados.append(evento_modificado)
+
+        return Response(eventos_modificados)
     
 
 # Fução para deletar. Método DELETE
@@ -135,7 +148,7 @@ class EventoMensal(APIView):
             mes = int(mes)
         except ValueError:
             return Response({"message": "Os parâmetros 'ano' e 'mes' devem ser números inteiros."}, status=400)
-        eventos = Evento.objects.filter(ultima_data__year=ano, ultima_data__month=mes)
+        eventos = Evento.objects.filter(data__year=ano, data__month=mes)
         if not eventos.exists():
             return Response({"message": "Nenhum evento encontrado para esse mês."}, status=404)
         serializer = EventoSerializer(eventos, many=True)
