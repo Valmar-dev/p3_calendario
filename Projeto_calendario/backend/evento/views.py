@@ -1,12 +1,4 @@
 from django.shortcuts import render
-from django.http import JsonResponse
-from datetime import datetime, timedelta
-from django.views.decorators.csrf import csrf_exempt
-import json
-from calendario.firebase_config import enviar_notificacao
-from .utils import ler_token  # Importe a função
-
-
 
 # evento/views.py
 from rest_framework.views import APIView
@@ -58,27 +50,7 @@ class EventoList(APIView):
         
         return Response(serializer.data)  # Retorna a lista de eventos em formato JSON
 
-# retornar eventos que tenham sempre = true
-class EventoSempre(APIView):
-    def get(self, request):
-        # Pega os parâmetros mês e ano da query string
-        mes = request.GET.get("mes")
 
-        if not mes:
-            return Response({"message": "Informe 'mes' e 'ano' como parâmetros na URL."}, status=400)
-        
-        try:
-            mes = int(mes)
-            ano = int(ano)
-        except ValueError:
-            return Response({"message": "Os parâmetros 'mes' e 'ano' devem ser números inteiros."}, status=400)
-
-        # Filtra apenas os eventos que têm 'sempre=True'
-        eventos = Evento.objects.filter(sempre=True, data__month=mes)
-
-        serializer = EventoSerializer(eventos, many=True)
-        
-        return Response(serializer.data)
     
 
 # Fução para deletar. Método DELETE
