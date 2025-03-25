@@ -70,7 +70,7 @@
               {{numero}}
               <span
                 class="indicador"
-                v-if="eventosProcessados.datasIniciais.includes(numero) "
+                v-if="eventosProcessados.datasIniciais.includes(numero) || eventosSempre.dias.includes(numero)"
               ></span>
             </li>
 
@@ -233,7 +233,9 @@ export default {
       mesSelecionado:0,
       mesSelecionadoString: null,
       diaSelecionado: 0,
-      eventos:[],
+      eventosSempre:{
+        dias:[]
+      },
       eventoMensal: [],
       eventosProcessadosDia: [],
       eventosProcessados: {  
@@ -392,19 +394,36 @@ export default {
       })
       .then(resp => resp.json())
       .then(data => {
-        if(data.message){
 
-          this.message = data.message
+        this.processarEventos(data, "mes")
 
-        } else {
+      })
 
-          this.processarEventos(data, "mes")
+      console.log("mes:",String(mes).padStart(2, "0"))
+      this.eventosSempre.dias = []
+      //coletar os eventos que sempre ocorrem
+      await fetch(`${this.apiURL}/eventos/sempre/?mes=${String(mes).padStart(2, "0")}`, {
+        method:"GET",
+        headers: {
+          "Content-type":"application/json"
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+
+        console.log("sempre mes:", data)
+
+
+        for (let i = 0; i < data.length; i++) {
+          let day = ""
+          day = new Date(data[i].data)
+          day = day.getUTCDate()
+
+          this.eventosSempre.dias.push(day)
 
         }
 
-        setTimeout(() => {
-          this.message = null
-        }, 1700);
+        console.log("dias:",this.eventosSempre)
 
       })
 
@@ -641,6 +660,8 @@ export default {
       this.eventosProcessados.sempre = [],
       this.eventosProcessados.cores = []
 
+      this.eventosSempre.dias = []
+
     },
 
     processarEventos(data, metodo){
@@ -648,21 +669,22 @@ export default {
       let day = ""
       let month = ""
       let ano = ""
-      let eventoModel = {
-        id: null,
-        descricao:null,
-        data:null,
-        ultima_data:null,
-        sempre:false,
-        cor:null
-      }
 
       for (let i = 0; i < data.length; i++) {
           
+        let eventoModel = {
+          id: null,
+          descricao:null,
+          data:null,
+          ultima_data:null,
+          sempre:false,
+          cor:null
+        }
          
         if(metodo == "mes"){
-
           if(data[i].sempre){
+            console.log("chamou mes ###############")
+          console.log("é pra processar")
 
             day = new Date(data[i].data)
             day = day.getUTCDate()
@@ -716,6 +738,7 @@ export default {
             eventoModel.ultima_data = data[i].ultima_data
             eventoModel.sempre = data[i].sempre
             eventoModel.cor = data[i].cor
+            this.eventosProcessadosDia.push(eventoModel)
 
           } else {
 
@@ -730,6 +753,7 @@ export default {
               eventoModel.ultima_data =  data[i].ultima_data
               eventoModel.sempre = data[i].sempre
               eventoModel.cor =  data[i].cor
+              this.eventosProcessadosDia.push(eventoModel)
 
             } else {
 
@@ -739,12 +763,11 @@ export default {
               eventoModel.ultima_data = null
               eventoModel.sempre = false
               eventoModel.cor = null
+              this.eventosProcessadosDia.push(eventoModel)
 
             }
           
           }
-          
-          this.eventosProcessadosDia.push(eventoModel)
 
         }
         
