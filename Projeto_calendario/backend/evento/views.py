@@ -3,8 +3,6 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from django.views.decorators.csrf import csrf_exempt
 import json
-from calendario.firebase_config import enviar_notificacao
-from .utils import ler_token  # Importe a função
 
 
 
@@ -69,7 +67,6 @@ class EventoSempre(APIView):
         
         try:
             mes = int(mes)
-            ano = int(ano)
         except ValueError:
             return Response({"message": "Os parâmetros 'mes' e 'ano' devem ser números inteiros."}, status=400)
 
