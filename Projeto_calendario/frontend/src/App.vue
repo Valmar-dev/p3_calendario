@@ -7,7 +7,7 @@ import { solicitarPermissao } from "./firebase";
 
 export default {
   mounted() {
-    solicitarPermissao();
+    
   },
 };
 </script>

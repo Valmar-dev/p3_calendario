@@ -70,7 +70,7 @@
               {{numero}}
               <span
                 class="indicador"
-                v-if="eventosSempreFalse.datasIniciais.includes(numero) || eventosSempre.datasFinais.includes(numero)"
+                v-if="eventosProcessados.datasIniciais.includes(numero) "
               ></span>
             </li>
 
@@ -100,18 +100,18 @@
 
               </section>
 
-              <section class="evento-card" v-for="evento in eventos" :key="evento.id" :style="{backgroundColor: evento.cor}">
+              <section class="evento-card" v-for="(evento, index) in eventosProcessadosDia" :key="index" :style="{backgroundColor: evento.cor}">
 
                 <h1>{{evento.descricao}}</h1>
 
                 <section class="botoes">
-                  <button @click="atualizarEvento($event, evento.id)" class="botao-editar">
+                  <button v-if="evento.descricao != null" @click="atualizarEvento($event, evento.id)" class="botao-editar">
                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
                     <g fill-opacity="0" fill="#dddddd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,256v-256h256v256z" id="bgRectangle"></path></g><g fill="#f5f5f5" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M43.125,2c-1.24609,0 -2.48828,0.48828 -3.4375,1.4375l-0.8125,0.8125l6.875,6.875c-0.00391,0.00391 0.8125,-0.8125 0.8125,-0.8125c1.90234,-1.90234 1.89844,-4.97656 0,-6.875c-0.95312,-0.94922 -2.19141,-1.4375 -3.4375,-1.4375zM37.34375,6.03125c-0.22656,0.03125 -0.4375,0.14453 -0.59375,0.3125l-32.4375,32.46875c-0.12891,0.11719 -0.22656,0.26953 -0.28125,0.4375l-2,7.5c-0.08984,0.34375 0.01172,0.70703 0.26172,0.95703c0.25,0.25 0.61328,0.35156 0.95703,0.26172l7.5,-2c0.16797,-0.05469 0.32031,-0.15234 0.4375,-0.28125l32.46875,-32.4375c0.39844,-0.38672 0.40234,-1.02344 0.01563,-1.42187c-0.38672,-0.39844 -1.02344,-0.40234 -1.42187,-0.01562l-32.28125,32.28125l-4.0625,-4.0625l32.28125,-32.28125c0.30078,-0.28906 0.39063,-0.73828 0.22266,-1.12109c-0.16797,-0.38281 -0.55469,-0.62109 -0.97266,-0.59766c-0.03125,0 -0.0625,0 -0.09375,0z"></path></g></g>
                     </svg>
                   </button>
 
-                  <button @click="deletarEvento($event, evento.id)" class="botao-excluir">
+                  <button v-if="evento.descricao != null" @click="deletarEvento($event, evento.id)" class="botao-excluir">
                       <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
                       <g fill-opacity="0" fill="#dddddd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,256v-256h256v256z" id="bgRectangle"></path></g><g fill="#f5f5f5" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M24,4c-3.50831,0 -6.4296,2.62143 -6.91992,6h-6.8418c-0.08516,-0.01457 -0.17142,-0.02176 -0.25781,-0.02148c-0.07465,0.00161 -0.14908,0.00879 -0.22266,0.02148h-3.25781c-0.54095,-0.00765 -1.04412,0.27656 -1.31683,0.74381c-0.27271,0.46725 -0.27271,1.04514 0,1.51238c0.27271,0.46725 0.77588,0.75146 1.31683,0.74381h2.13867l2.51758,26.0293c0.27108,2.80663 2.65553,4.9707 5.47461,4.9707h14.73633c2.81922,0 5.20364,-2.16383 5.47461,-4.9707l2.51953,-26.0293h2.13867c0.54095,0.00765 1.04412,-0.27656 1.31683,-0.74381c0.27271,-0.46725 0.27271,-1.04514 0,-1.51238c-0.27271,-0.46725 -0.77588,-0.75146 -1.31683,-0.74381h-3.25586c-0.15912,-0.02581 -0.32135,-0.02581 -0.48047,0h-6.84375c-0.49032,-3.37857 -3.41161,-6 -6.91992,-6zM24,7c1.87916,0 3.42077,1.26816 3.86133,3h-7.72266c0.44056,-1.73184 1.98217,-3 3.86133,-3zM11.65039,13h24.69727l-2.49219,25.74023c-0.12503,1.29513 -1.18751,2.25977 -2.48828,2.25977h-14.73633c-1.29892,0 -2.36336,-0.96639 -2.48828,-2.25977zM20.47656,17.97852c-0.82766,0.01293 -1.48843,0.69381 -1.47656,1.52148v15c-0.00765,0.54095 0.27656,1.04412 0.74381,1.31683c0.46725,0.27271 1.04514,0.27271 1.51238,0c0.46725,-0.27271 0.75146,-0.77588 0.74381,-1.31683v-15c0.00582,-0.40562 -0.15288,-0.7963 -0.43991,-1.08296c-0.28703,-0.28666 -0.67792,-0.44486 -1.08353,-0.43852zM27.47656,17.97852c-0.82766,0.01293 -1.48843,0.69381 -1.47656,1.52148v15c-0.00765,0.54095 0.27656,1.04412 0.74381,1.31683c0.46725,0.27271 1.04514,0.27271 1.51238,0c0.46725,-0.27271 0.75146,-0.77588 0.74381,-1.31683v-15c0.00582,-0.40562 -0.15288,-0.7963 -0.43991,-1.08296c-0.28703,-0.28666 -0.67792,-0.44486 -1.08353,-0.43852z"></path></g></g>
                       </svg>
@@ -145,7 +145,7 @@
 
               <div class="input-container default" v-if="sempre == false">
                 <label for="quant">Por quantos anos se repete?</label>
-                <input type="number" name="quant" id="quant" v-model="quant" placeholder="Quantidade de anos" required>
+                <input type="number" name="quant" id="quant" v-model="quant" min="0" placeholder="Quantidade de anos" required>
               </div>
 
               <input type="hidden" name="data" id="data" v-model="data">
@@ -235,14 +235,9 @@ export default {
       diaSelecionado: 0,
       eventos:[],
       eventoMensal: [],
-      eventosSempreFalse: {
-        descricoes: [],
-        datasIniciais: [],
-        datasFinais: [],
-        sempre:[],
-        cores:[]
-      },
-      eventosSempre: {  
+      eventosProcessadosDia: [],
+      eventosProcessados: {  
+        ids: [],
         descricoes: [],      
         datasIniciais: [],
         datasFinais: [],
@@ -367,6 +362,7 @@ export default {
     adicionarEvento(){
       this.mostrarDia = false
       this.mostrarFormulario = true
+      this.isRegister = true
       this.limparFomulario()
     },
 
@@ -381,23 +377,12 @@ export default {
 
       this.exibirMenuAno = false
       this.exibirMenuMes = false
-      this.eventosSempreFalse.descricoes = []
-      this.eventosSempreFalse.datasIniciais = []
-      this.eventosSempreFalse.datasFinais = []
-      this.eventosSempreFalse.sempre = []
-      this.eventosSempreFalse.cores = []
-
-      this.eventosSempre.descricoes = []
-      this.eventosSempre.datasIniciais = []
-      this.eventosSempre.datasFinais = []
-      this.eventosSempre.sempre = []
-      this.eventosSempre.cores = []
+      this.limparEventos()
 
       this.contagemDia = new Date(ano, mes, 0).getDate()
       this.anoSelecionado = ano
       this.mesSelecionado = mes
       this.mesSelecionadoString = this.mesString(mes)
-      console.log(`${ano} ${mes} dias: ${this.contagemDia}`)
 
       await fetch(`${this.apiURL}/eventos/mensal/?ano=${ano}&mes=${String(mes).padStart(2, "0")}`, {
         method:"GET",
@@ -407,47 +392,13 @@ export default {
       })
       .then(resp => resp.json())
       .then(data => {
-        console.log(data)
         if(data.message){
 
           this.message = data.message
 
         } else {
 
-          this.eventoMensal = data
-
-          let day = ""
-
-          for (let i = 0; i < data.length; i++) {
-              
-            if(data[i].sempre == false){
-              day = new Date(data[i].data)
-              day = day.getUTCDate()
-              this.eventosSempreFalse.descricoes.push(data[i].descricao)
-              this.eventosSempreFalse.datasIniciais.push(day)
-              this.eventosSempreFalse.datasFinais.push(data[i].ultima_data)
-              this.eventosSempreFalse.sempre.push(data[i].sempre)
-              this.eventosSempreFalse.cores.push(data[i].cor)
-            }
-
-          }
-
-          for (let i = 0; i < data.length; i++) {
-              
-            if(data[i].sempre == true){
-              day = new Date(data[i].ultima_data)
-              day = day.getUTCDate()
-              this.eventosSempre.descricoes.push(data[i].descricao)
-              this.eventosSempre.datasIniciais.push(data[i].data)
-              this.eventosSempre.datasFinais.push(day)
-              this.eventosSempre.sempre.push(data[i].sempre)
-              this.eventosSempre.cores.push(data[i].cor)
-            }
-
-          }
-
-          console.log(this.eventosSempre);
-          
+          this.processarEventos(data, "mes")
 
         }
 
@@ -460,7 +411,6 @@ export default {
     },
 
     async registrarEvento(e){
-
       e.preventDefault()
       var data = {}
       var jsonData = "" 
@@ -542,7 +492,7 @@ export default {
     async atualizarEvento(e, id){
       
       e.preventDefault()
-      console.log(id, "teste")
+      this.limparFomulario()
       this.mostrarFormulario = true
       this.mostrarDia = false
       this.isRegister = false
@@ -603,7 +553,6 @@ export default {
       })
       .then(resp => resp.json)
       .then(data => {
-        console.log(data)
         this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
       })
       
@@ -612,6 +561,7 @@ export default {
     ocultarCard(){
 
       this.mostrarDia = false
+      this.limparEventos()
       this.procurarEventosMes(this.mesSelecionado, this.anoSelecionado)
 
     },
@@ -622,6 +572,7 @@ export default {
       this.diaSelecionado = dia
       this.mesSelecionado = mes
       this.mostrarDia = true
+      this.limparEventos()
 
       await fetch(`${this.apiURL}/eventos/?mes=${String(mes).padStart(2, "0")}&dia=${String(dia).padStart(2, "0")}`, {
         method:"GET",
@@ -632,7 +583,7 @@ export default {
       .then(resp => resp.json())
       .then(data => {
 
-        this.eventos = data
+        this.processarEventos(data, "dia")
 
       })
 
@@ -678,6 +629,130 @@ export default {
       this.isRegister = true,
       this.quant = 0,
       this.message = null
+    },
+
+    limparEventos(){
+      this.eventosProcessadosDia = []
+
+      this.eventosProcessados.ids = [],
+      this.eventosProcessados.descricoes = [],      
+      this.eventosProcessados.datasIniciais = [],
+      this.eventosProcessados.datasFinais = [],
+      this.eventosProcessados.sempre = [],
+      this.eventosProcessados.cores = []
+
+    },
+
+    processarEventos(data, metodo){
+
+      let day = ""
+      let month = ""
+      let ano = ""
+      let eventoModel = {
+        id: null,
+        descricao:null,
+        data:null,
+        ultima_data:null,
+        sempre:false,
+        cor:null
+      }
+
+      for (let i = 0; i < data.length; i++) {
+          
+         
+        if(metodo == "mes"){
+
+          if(data[i].sempre){
+
+            day = new Date(data[i].data)
+            day = day.getUTCDate()
+
+            this.eventosProcessados.datasIniciais.push(day)
+            this.eventosProcessados.ids.push(data[i].id)
+            this.eventosProcessados.descricoes.push(data[i].descricao)
+            this.eventosProcessados.datasFinais.push(data[i].ultima_data)
+            this.eventosProcessados.sempre.push(data[i].sempre)
+            this.eventosProcessados.cores.push(data[i].cor)
+
+
+          } else {
+
+            ano = new Date(data[i].ultima_data)
+            ano = ano.getFullYear()
+            if(ano <= this.anoSelecionado){
+              day = new Date(data[i].data)
+              day = day.getUTCDate()
+              this.eventosProcessados.datasIniciais.push(day)
+              this.eventosProcessados.ids.push(data[i].id)
+              this.eventosProcessados.descricoes.push(data[i].descricao)
+              this.eventosProcessados.datasFinais.push(data[i].ultima_data)
+              this.eventosProcessados.sempre.push(data[i].sempre)
+              this.eventosProcessados.cores.push(data[i].cor)
+            } else {
+
+              this.eventosProcessados.datasIniciais.push(null)
+              this.eventosProcessados.ids.push(null)
+              this.eventosProcessados.descricoes.push(null)
+              this.eventosProcessados.datasFinais.push(null)
+              this.eventosProcessados.sempre.push(null)
+              this.eventosProcessados.cores.push(null)
+
+            }
+          
+          }
+
+          console.log("Mes chamado:", this.eventosProcessados);
+
+        } else {
+
+          if(data[i].sempre){
+
+            day = new Date(data[i].data)
+            day = day.getUTCDate()
+
+            eventoModel.data = day
+            eventoModel.id = data[i].id
+            eventoModel.descricao = data[i].descricao
+            eventoModel.ultima_data = data[i].ultima_data
+            eventoModel.sempre = data[i].sempre
+            eventoModel.cor = data[i].cor
+
+          } else {
+
+            ano = new Date(data[i].ultima_data)
+            ano = ano.getFullYear()
+            if(this.anoSelecionado <= ano){
+              day = new Date(data[i].data)
+              day = day.getUTCDate()
+              eventoModel.data = day
+              eventoModel.id = data[i].id
+              eventoModel.descricao =  data[i].descricao
+              eventoModel.ultima_data =  data[i].ultima_data
+              eventoModel.sempre = data[i].sempre
+              eventoModel.cor =  data[i].cor
+
+            } else {
+
+              eventoModel.id = null
+              eventoModel.descricao = null
+              eventoModel.data = null
+              eventoModel.ultima_data = null
+              eventoModel.sempre = false
+              eventoModel.cor = null
+
+            }
+          
+          }
+          
+          this.eventosProcessadosDia.push(eventoModel)
+
+        }
+        
+      }
+
+
+      console.log("Mes chamado:", this.eventosProcessados);
+      console.log("Dias chamado:", this.eventosProcessadosDia);
     }
 
   }
@@ -796,8 +871,8 @@ export default {
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 58px;
-  width: 58px;
+  height: 52px;
+  width: 52px;
   margin-block: 7px;
   background-color: var(--color-main04);
   border-radius: 50%;
@@ -809,8 +884,8 @@ export default {
 
 .indicador{
   position: absolute;
-  width: 59px;
-  height: 59px;
+  width: 53px;
+  height: 53px;
   border-radius: 50%;
   border: 3px solid rgb(0, 247, 255);
 }

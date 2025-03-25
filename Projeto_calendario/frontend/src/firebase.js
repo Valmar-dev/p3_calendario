@@ -1,4 +1,4 @@
-// Importando os módulos do Firebase
+/* // Importando os módulos do Firebase
 import { initializeApp } from 'firebase/app';
 import axios from 'axios';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
@@ -65,3 +65,4 @@ onMessage(messaging, (payload) => {
     new Notification(notificationTitle, notificationOptions);
   }
 });
+ */
