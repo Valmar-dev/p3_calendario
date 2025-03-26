@@ -1,5 +1,4 @@
 {
-    "version": 2,
     "builds": [
       {
         "src": "backend/manage.py",
@@ -9,7 +8,7 @@
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "backend/manage.py"
+        "dest": "backend/wsgi.py"
       }
     ]
   }
