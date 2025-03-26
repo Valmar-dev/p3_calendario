@@ -29,7 +29,7 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOW_ALL_ORIGINS = True
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "192.168.0.10", "192.168.0.15", "*"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "192.168.0.10", "192.168.0.15", ".vercel.app", "*"]
 
 
 # Adicionei a habilitação de cors
