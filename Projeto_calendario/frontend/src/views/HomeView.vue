@@ -399,7 +399,6 @@ export default {
 
       })
 
-      console.log("mes:",String(mes).padStart(2, "0"))
       this.eventosSempre.dias = []
       //coletar os eventos que sempre ocorrem
       await fetch(`${this.apiURL}/eventos/sempre/?mes=${String(mes).padStart(2, "0")}`, {
@@ -411,20 +410,18 @@ export default {
       .then(resp => resp.json())
       .then(data => {
 
-        console.log("sempre mes:", data)
-
-
         for (let i = 0; i < data.length; i++) {
           let day = ""
           day = new Date(data[i].data)
           day = day.getUTCDate()
 
           this.eventosSempre.dias.push(day)
-
+        
         }
 
-        console.log("dias:",this.eventosSempre)
-
+      })
+      .catch(err => {
+        console.log(err)
       })
 
     },
@@ -669,6 +666,7 @@ export default {
       let day = ""
       let month = ""
       let ano = ""
+      let anoBase = ""
 
       for (let i = 0; i < data.length; i++) {
           
@@ -682,9 +680,7 @@ export default {
         }
          
         if(metodo == "mes"){
-          if(data[i].sempre){
-            console.log("chamou mes ###############")
-          console.log("é pra processar")
+          if(data[i].sempre == true){
 
             day = new Date(data[i].data)
             day = day.getUTCDate()
@@ -699,9 +695,14 @@ export default {
 
           } else {
 
+            anoBase = new Date(data[i].data)
+            anoBase = anoBase.getFullYear()
             ano = new Date(data[i].ultima_data)
             ano = ano.getFullYear()
-            if(ano <= this.anoSelecionado){
+
+            
+
+            if(this.anoSelecionado <= ano && this.anoSelecionado >= anoBase){
               day = new Date(data[i].data)
               day = day.getUTCDate()
               this.eventosProcessados.datasIniciais.push(day)
@@ -711,7 +712,6 @@ export default {
               this.eventosProcessados.sempre.push(data[i].sempre)
               this.eventosProcessados.cores.push(data[i].cor)
             } else {
-
               this.eventosProcessados.datasIniciais.push(null)
               this.eventosProcessados.ids.push(null)
               this.eventosProcessados.descricoes.push(null)
@@ -720,10 +720,9 @@ export default {
               this.eventosProcessados.cores.push(null)
 
             }
-          
+
           }
 
-          console.log("Mes chamado:", this.eventosProcessados);
 
         } else {
 
@@ -742,9 +741,12 @@ export default {
 
           } else {
 
+            anoBase = new Date(data[i].data)
+            anoBase = anoBase.getFullYear()
             ano = new Date(data[i].ultima_data)
             ano = ano.getFullYear()
-            if(this.anoSelecionado <= ano){
+
+            if(this.anoSelecionado <= ano && this.anoSelecionado >= anoBase){
               day = new Date(data[i].data)
               day = day.getUTCDate()
               eventoModel.data = day
@@ -773,9 +775,6 @@ export default {
         
       }
 
-
-      console.log("Mes chamado:", this.eventosProcessados);
-      console.log("Dias chamado:", this.eventosProcessadosDia);
     }
 
   }

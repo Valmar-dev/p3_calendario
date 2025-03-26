@@ -8,6 +8,9 @@ from .models import Evento
 from .serializers import EventoSerializer
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
+from datetime import date
+from django.db import models
+
 
 # Cadastro de eventos. Método POST
 class EventoCadastro(APIView):  
@@ -93,7 +96,6 @@ class EventoDetail(APIView):
         # Retorna o evento serializado com status 200 OK
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-# Funão para buscar apenas o mes e ano GET
 class EventoMensal(APIView):
     def get(self, request):
         ano = request.GET.get("ano")
@@ -107,90 +109,31 @@ class EventoMensal(APIView):
             mes = int(mes)
         except ValueError:
             return Response({"message": "Os parâmetros 'ano' e 'mes' devem ser números inteiros."}, status=400)
-        eventos = Evento.objects.filter(ultima_data__year=ano, ultima_data__month=mes)
-        if not eventos.exists():
-            return Response({"message": "Nenhum evento encontrado para esse mês."}, status=404)
+        
+        eventos = Evento.objects.filter(
+            data__year__lte=ano,
+            ultima_data__year__gte=ano,
+            data__month__lte=mes,
+            ultima_data__month__gte=mes
+        )
+        
+        serializer = EventoSerializer(eventos, many=True)
+        return Response(serializer.data)
+
+
+
+class EventoSempre(APIView):
+    def get(self, request):
+        mes = request.GET.get("mes")
+
+        if not mes:
+            return Response({"message": "Os parâmetros 'mes' é obrigatório."}, status=400)
+
+        try:
+            mes = int(mes)
+        except ValueError:
+            return Response({"message": "Os parâmetros 'mes' deve ser números inteiro."}, status=400)
+        eventos = Evento.objects.filter(sempre=True, ultima_data__month=mes)
+
         serializer = EventoSerializer(eventos, many=True)
         return Response(serializer.data)  # Retorna a lista de eventos no formato JSON
-
-@csrf_exempt
-def verificar_eventos(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        token = data.get("token")  # Token do Firebase do usuário
-
-        if not token:
-            return JsonResponse({"error": "Token não fornecido"}, status=400)
-
-        hoje = datetime.today().date()
-        um_mes_antes = hoje + timedelta(days=30)  # Data de um mês antes
-        um_dia_antes = hoje + timedelta(days=1)   # Data de um dia antes
-
-        eventos = Evento.objects.all()
-        notificacoes_enviadas = 0
-
-        for evento in eventos:
-            if evento.data:
-                evento_data = evento.data  # Já está no formato YYYY-MM-DD no banco
-
-                # Verifica se o evento ocorre 1 mês antes ou 1 dia antes
-                if evento_data == um_mes_antes or evento_data == um_dia_antes:
-                    titulo = "Lembrete de Evento"
-                    mensagem = f"O evento '{evento.descricao}' ocorrerá em {evento_data}!"
-                    response = enviar_notificacao(token, titulo, mensagem)
-                    print(f"Notificação enviada: {response}")
-                    notificacoes_enviadas += 1
-
-        return JsonResponse({"message": f"{notificacoes_enviadas} notificações enviadas!"})
-    
-    return JsonResponse({"error": "Método inválido"}, status=400)
-
-
-@csrf_exempt
-def registrar_token(request):
-    if request.method == "POST":
-        try:
-            body = json.loads(request.body)
-            token = body.get('token', None)
-
-            if token:
-                salvar_token(token)  # Salva o token usando a função do utils.py
-
-                return JsonResponse({"status": "sucesso", "message": "Token recebido com sucesso"})
-            else:
-                return JsonResponse({"status": "erro", "message": "Token não fornecido"}, status=400)
-        except Exception as e:
-            return JsonResponse({"status": "erro", "message": str(e)}, status=500)
-    else:
-        return JsonResponse({"status": "erro", "message": "Método não permitido"}, status=405)
-    
-
-def verificar_eventos(request):
-    if request.method == "POST":
-        token = ler_token()  # Lê o token usando a função do utils.py
-
-        if not token:
-            return JsonResponse({"error": "Token não encontrado"}, status=400)
-
-        hoje = datetime.today().date()
-        um_mes_antes = hoje + timedelta(days=30)  # Data de um mês antes
-        um_dia_antes = hoje + timedelta(days=1)   # Data de um dia antes
-
-        eventos = Evento.objects.all()
-        notificacoes_enviadas = 0
-
-        for evento in eventos:
-            if evento.data:
-                evento_data = evento.data  # Já está no formato YYYY-MM-DD no banco
-
-                # Verifica se o evento ocorre 1 mês antes ou 1 dia antes
-                if evento_data.date() == um_mes_antes.date() or evento_data.date() == um_dia_antes.date():
-                    titulo = "Lembrete de Evento"
-                    mensagem = f"O evento '{evento.descricao}' ocorrerá em {evento_data}!"
-                    response = enviar_notificacao(token, titulo, mensagem)
-                    print(f"Notificação enviada: {response}")
-                    notificacoes_enviadas += 1
-
-        return JsonResponse({"message": f"{notificacoes_enviadas} notificações enviadas!"})
-    
-    return JsonResponse({"error": "Método inválido"}, status=400)
