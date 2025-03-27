@@ -1,3 +1,5 @@
+from functools import cache
+from django.core.cache import cache
 from django.shortcuts import render
 
 # evento/views.py
@@ -8,6 +10,9 @@ from .models import Evento
 from .serializers import EventoSerializer
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
+from datetime import date, datetime, timedelta
+from django.db import models
+
 
 # Cadastro de eventos. Método POST
 class EventoCadastro(APIView):  
@@ -43,7 +48,7 @@ class EventoList(APIView):
             return Response({"message": "Os parâmetros 'mes' e 'dia' devem ser números inteiros."}, status=400)
 
         # Filtra os eventos de acordo com o mês e o dia
-        eventos = Evento.objects.filter(data__month=mes, data__day=dia)
+        eventos = Evento.objects.filter(ultima_data__month=mes, ultima_data__day=dia)
 
         # Serializa os eventos encontrados
         serializer = EventoSerializer(eventos, many=True)
@@ -51,7 +56,39 @@ class EventoList(APIView):
         return Response(serializer.data)  # Retorna a lista de eventos em formato JSON
 
 
-    
+# rota para ajudar a verificar as notificações, coleta tambem o ano
+class EventosProximos30Dias(APIView):
+    def get(self, request):
+        try:
+            # Chave de cache única por dia
+            hoje = datetime.now().date()
+            cache_key = f"eventos_30dias_{hoje}"
+            
+            # Busca no cache
+            eventos_cache = cache.get(cache_key)
+            
+            if eventos_cache is not None:
+                return Response(eventos_cache)
+            
+            # Se não estiver no cache, busca no banco
+            data_futura = hoje + timedelta(days=30)
+            eventos = Evento.objects.filter(
+                ultima_data__range=[hoje, data_futura]
+            ).order_by('ultima_data')
+            
+            serializer = EventoSerializer(eventos, many=True)
+            dados_serializados = serializer.data
+            
+            # Armazena no cache
+            cache.set(cache_key, dados_serializados, timeout=86400)  # 24h
+            
+            return Response(dados_serializados)
+            
+        except Exception as e:
+            return Response(
+                {"error": f"Erro ao buscar eventos: {str(e)}"},
+                status=500
+            )
 
 # Fução para deletar. Método DELETE
 class EventoDelete(APIView):
@@ -80,11 +117,19 @@ class EventoUpdate(APIView):
 # Função para GET para receber apenas um evento
 class EventoDetail(APIView):
     def get(self, request, id):
-        evento = get_object_or_404(Evento, id=id)  # Busca evento pelo ID ou retorna 404
+        # Tenta buscar o evento pelo ID. Se não encontrar, retorna 404 automaticamente.
+        evento = get_object_or_404(Evento, id=id)
+        
+        # Verifica se o evento existe no banco, caso contrário retorna uma mensagem de erro
+        if not evento:
+            return Response({"message": "Nenhum evento encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Serializa o evento encontrado
         serializer = EventoSerializer(evento)
+        
+        # Retorna o evento serializado com status 200 OK
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-# Funão para buscar apenas o mes e ano GET
 class EventoMensal(APIView):
     def get(self, request):
         ano = request.GET.get("ano")
@@ -98,8 +143,31 @@ class EventoMensal(APIView):
             mes = int(mes)
         except ValueError:
             return Response({"message": "Os parâmetros 'ano' e 'mes' devem ser números inteiros."}, status=400)
-        eventos = Evento.objects.filter(data__year=ano, data__month=mes)
-        if not eventos.exists():
-            return Response({"message": "Nenhum evento encontrado para esse mês."}, status=404)
+        
+        eventos = Evento.objects.filter(
+            data__year__lte=ano,
+            ultima_data__year__gte=ano,
+            data__month__lte=mes,
+            ultima_data__month__gte=mes
+        )
+        
+        serializer = EventoSerializer(eventos, many=True)
+        return Response(serializer.data)
+
+
+
+class EventoSempre(APIView):
+    def get(self, request):
+        mes = request.GET.get("mes")
+
+        if not mes:
+            return Response({"message": "Os parâmetros 'mes' é obrigatório."}, status=400)
+
+        try:
+            mes = int(mes)
+        except ValueError:
+            return Response({"message": "Os parâmetros 'mes' deve ser números inteiro."}, status=400)
+        eventos = Evento.objects.filter(sempre=True, ultima_data__month=mes)
+
         serializer = EventoSerializer(eventos, many=True)
         return Response(serializer.data)  # Retorna a lista de eventos no formato JSON

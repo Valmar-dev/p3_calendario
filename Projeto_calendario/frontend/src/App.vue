@@ -2,6 +2,16 @@
   <router-view/>
 </template>
 
+<script>
+import { solicitarPermissao } from "./firebase";
+
+export default {
+  mounted() {
+    
+  },
+};
+</script>
+
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -15,9 +25,10 @@
 
   --color-main00:#f5f5f5;
   --color-main01:#cbe5e7;
-  --color-main02:#7fcec3;
-  --color-main03:#289482;
-  --color-main04:#165e52;
+  --color-main02:#9cced1;
+  --color-main03:#497a96;
+  --color-main04:#16415e;
+  --color-main05:#dfebf3;
 
   --color-event00:#777783;
   --color-event01:#3d7f63;
@@ -31,6 +42,10 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+body{
+  background-color: var(--color-main05);
 }
 
 button{
@@ -52,6 +67,27 @@ nav a.router-link-exact-active {
   color: #42b983;
 }
 
+#message{
+  position: fixed;
+  display: block;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  padding: 10px;
+  color: var(--color-main00);
+  background: var(--color-main03);
+  border-radius: 15px;
+  z-index: 1004;
+  animation: born 0.4s ease-in-out both;
+}
+
+@keyframes born {
+  to{
+    top: 20px;
+  }
+}
+
 header{
   padding: 14px 0;
   display: flex;
@@ -67,9 +103,11 @@ section#dataEscolhida{
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  color: var(--color-main04);
   width: 100%;
-  margin-left: 150px;
+  margin-left: 170px;
   margin-top: 15px;
+  font-size: clamp(0.875rem, 0.6125rem + 1.4vw, 1.75rem);;
 }
 
 .home-view{
@@ -82,17 +120,17 @@ section#dataEscolhida{
   z-index: 1000;
   width: 100vw;
   height: 100vh;
-  background-color: var(--color-main00);;
-  opacity: 0.7;
+  background-color: var(--color-main04);;
+  opacity: 0.4;
 }
 
 .card{
   position: fixed;
   bottom: 0;
   z-index: 1001;
-  background-color: var(--color-main02);;
+  background-color: var(--color-main00);;
   width: 100vw;
-  padding: 0 0 0 0;
+  padding: 0 0 30px 0;
   border-radius: 40px 40px 0 0;
   opacity: 1;
   border: none;
@@ -112,7 +150,7 @@ section#dataEscolhida{
   justify-content: center;
   align-items: center;
   padding: 0 20px;
-  background-color: var(--color-main02);
+  background-color: var(--color-main00);
   padding: 10px;
   z-index: 1002;
 }
@@ -120,13 +158,14 @@ section#dataEscolhida{
 .bar{
   position: absolute;
   top: 10px;
-  right: 50vw;
+  right: 48vw;
   transform: translateX(50%) ;
-  width: 30%;
-  height: 10px;
+  width: 40%;
+  height: 14px;
   background-color: var(--color-main04);
   border-radius: 10px;
   z-index: 1003;
+  cursor: move;
 }
   
 .bar:active{
@@ -286,9 +325,22 @@ footer{
   position: fixed;
   bottom: 0;
   width: 100vw;
-  background-color: var(--color-main01);
+  background-color: var(--color-main03);
+  color: #fff;
   padding: 3px 0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.8em;
+  letter-spacing: 1px;
   z-index: 1002;
+  cursor: default;
+}
+
+
+/* configurações para tablet */
+@media (width >= 480px) {
+  section#dataEscolhida{
+    margin-left: 0;
+  }
 }
 
 </style>

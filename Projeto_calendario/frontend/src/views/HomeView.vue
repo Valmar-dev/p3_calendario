@@ -1,11 +1,15 @@
 <template>
   <div class="home-view">
     
+    <div id="message" v-if="message">
+      <p class="p-message">{{this.message}}</p>
+    </div>
+
     <header>
 
-      <section id="escolhaData" class="menu-suspenso">
+      <section id="escolhaData" class="menu-suspenso" @mouseleave="controleMenuMes('ocultar'),controleMenuAno('ocultar')">
 
-        <div id="mesEscolha" @mouseleave="controleMenuMes('ocultar')" @mouseenter="controleMenuMes(this.exibirMenuMes)" class="lista-escolha">
+        <div id="mesEscolha" @click="controleMenuMes(this.exibirMenuMes)" class="lista-escolha">
 
           <ul class="lista-meses" >
             <li id="headerMes" class="header-lista">Mês</li>
@@ -29,7 +33,7 @@
 
         </div>
 
-        <div id="anoEscolha" @mouseleave="controleMenuAno('ocultar')" @mouseenter="controleMenuAno(this.exibirMenuAno)" class="lista-escolha">
+        <div id="anoEscolha" @click="controleMenuAno(this.exibirMenuAno)" class="lista-escolha">
           <!-- loop para gerar os próximos 3 anos -->
           <ul class="lista-anos">
 
@@ -64,6 +68,10 @@
 
             <li class="dia" v-for="numero in this.contagemDia" :key="numero" @click="procurarEventosDia(numero, this.mesSelecionado)">
               {{numero}}
+              <span
+                class="indicador"
+                v-if="eventosProcessados.datasIniciais.includes(numero) || eventosSempre.dias.includes(numero)"
+              ></span>
             </li>
 
           </ul>
@@ -92,18 +100,18 @@
 
               </section>
 
-              <section class="evento-card" v-for="evento in eventos" :key="evento.id" :style="{backgroundColor: evento.cor}">
+              <section class="evento-card" v-for="(evento, index) in eventosProcessadosDia" :key="index" :style="{backgroundColor: evento.cor}">
 
                 <h1>{{evento.descricao}}</h1>
 
                 <section class="botoes">
-                  <button @click="atualizarEvento($event, evento.id)" class="botao-editar">
+                  <button v-if="evento.descricao != null" @click="atualizarEvento($event, evento.id)" class="botao-editar">
                     <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
                     <g fill-opacity="0" fill="#dddddd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,256v-256h256v256z" id="bgRectangle"></path></g><g fill="#f5f5f5" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M43.125,2c-1.24609,0 -2.48828,0.48828 -3.4375,1.4375l-0.8125,0.8125l6.875,6.875c-0.00391,0.00391 0.8125,-0.8125 0.8125,-0.8125c1.90234,-1.90234 1.89844,-4.97656 0,-6.875c-0.95312,-0.94922 -2.19141,-1.4375 -3.4375,-1.4375zM37.34375,6.03125c-0.22656,0.03125 -0.4375,0.14453 -0.59375,0.3125l-32.4375,32.46875c-0.12891,0.11719 -0.22656,0.26953 -0.28125,0.4375l-2,7.5c-0.08984,0.34375 0.01172,0.70703 0.26172,0.95703c0.25,0.25 0.61328,0.35156 0.95703,0.26172l7.5,-2c0.16797,-0.05469 0.32031,-0.15234 0.4375,-0.28125l32.46875,-32.4375c0.39844,-0.38672 0.40234,-1.02344 0.01563,-1.42187c-0.38672,-0.39844 -1.02344,-0.40234 -1.42187,-0.01562l-32.28125,32.28125l-4.0625,-4.0625l32.28125,-32.28125c0.30078,-0.28906 0.39063,-0.73828 0.22266,-1.12109c-0.16797,-0.38281 -0.55469,-0.62109 -0.97266,-0.59766c-0.03125,0 -0.0625,0 -0.09375,0z"></path></g></g>
                     </svg>
                   </button>
 
-                  <button @click="deletarEvento($event, evento.id)" class="botao-excluir">
+                  <button v-if="evento.descricao != null" @click="deletarEvento($event, evento.id)" class="botao-excluir">
                       <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="20" height="20" viewBox="0,0,256,256">
                       <g fill-opacity="0" fill="#dddddd" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><path d="M0,256v-256h256v256z" id="bgRectangle"></path></g><g fill="#f5f5f5" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M24,4c-3.50831,0 -6.4296,2.62143 -6.91992,6h-6.8418c-0.08516,-0.01457 -0.17142,-0.02176 -0.25781,-0.02148c-0.07465,0.00161 -0.14908,0.00879 -0.22266,0.02148h-3.25781c-0.54095,-0.00765 -1.04412,0.27656 -1.31683,0.74381c-0.27271,0.46725 -0.27271,1.04514 0,1.51238c0.27271,0.46725 0.77588,0.75146 1.31683,0.74381h2.13867l2.51758,26.0293c0.27108,2.80663 2.65553,4.9707 5.47461,4.9707h14.73633c2.81922,0 5.20364,-2.16383 5.47461,-4.9707l2.51953,-26.0293h2.13867c0.54095,0.00765 1.04412,-0.27656 1.31683,-0.74381c0.27271,-0.46725 0.27271,-1.04514 0,-1.51238c-0.27271,-0.46725 -0.77588,-0.75146 -1.31683,-0.74381h-3.25586c-0.15912,-0.02581 -0.32135,-0.02581 -0.48047,0h-6.84375c-0.49032,-3.37857 -3.41161,-6 -6.91992,-6zM24,7c1.87916,0 3.42077,1.26816 3.86133,3h-7.72266c0.44056,-1.73184 1.98217,-3 3.86133,-3zM11.65039,13h24.69727l-2.49219,25.74023c-0.12503,1.29513 -1.18751,2.25977 -2.48828,2.25977h-14.73633c-1.29892,0 -2.36336,-0.96639 -2.48828,-2.25977zM20.47656,17.97852c-0.82766,0.01293 -1.48843,0.69381 -1.47656,1.52148v15c-0.00765,0.54095 0.27656,1.04412 0.74381,1.31683c0.46725,0.27271 1.04514,0.27271 1.51238,0c0.46725,-0.27271 0.75146,-0.77588 0.74381,-1.31683v-15c0.00582,-0.40562 -0.15288,-0.7963 -0.43991,-1.08296c-0.28703,-0.28666 -0.67792,-0.44486 -1.08353,-0.43852zM27.47656,17.97852c-0.82766,0.01293 -1.48843,0.69381 -1.47656,1.52148v15c-0.00765,0.54095 0.27656,1.04412 0.74381,1.31683c0.46725,0.27271 1.04514,0.27271 1.51238,0c0.46725,-0.27271 0.75146,-0.77588 0.74381,-1.31683v-15c0.00582,-0.40562 -0.15288,-0.7963 -0.43991,-1.08296c-0.28703,-0.28666 -0.67792,-0.44486 -1.08353,-0.43852z"></path></g></g>
                       </svg>
@@ -112,6 +120,10 @@
                 </section>
 
               </section>
+
+              <div class="sem-eventos-container" v-if="eventosProcessadosDia.length == 0">
+                <p>Não há eventos para esse dia :/</p> <button @click="adicionarEvento()"> Crie um evento!</button>
+              </div>
 
             </div>
 
@@ -126,7 +138,9 @@
               </svg>
             </button>
 
-            <form enctype="multipart/form-data" @submit="isRegister == true ? registrarEvento($event) : atualizarEvento($event)">
+            <form enctype="multipart/form-data" @submit="isRegister == true ? registrarEvento($event) : registrarEvento($event)">
+
+              <input type="hidden" name="id" id="id" v-model="id">
             
               <div class="input-container default">
                 <label for="descricao">Descrição do evento:</label>
@@ -135,7 +149,7 @@
 
               <div class="input-container default" v-if="sempre == false">
                 <label for="quant">Por quantos anos se repete?</label>
-                <input type="number" name="quant" id="quant" v-model="quant" placeholder="Quantidade de anos" required>
+                <input type="number" name="quant" id="quant" v-model="quant" min="0" placeholder="Quantidade de anos" required>
               </div>
 
               <input type="hidden" name="data" id="data" v-model="data">
@@ -186,19 +200,6 @@
 
 <script>
 
-/* 
-
-- fazer estilos dos dias
-- fazer estilos de evento por card
-- fazer estilos do formularios
-- fazer estilos de tamanho de fonte por card
-
--- fazer a versão pc ( faze verificalçao para realizar a função resize apenas para celulares )
-
--- preparar pra receber a API
-
-*/
-
 import {BASE_URL} from '@/config'
 
 export default {
@@ -223,9 +224,26 @@ export default {
       mesSelecionado:0,
       mesSelecionadoString: null,
       diaSelecionado: 0,
-      eventos:[],
+
+      //variaveis para controle de eventos
+      eventosSempre:{
+        dias:[]
+      },
+      faltandoUmMes: [],
+      faltandoUmdia: [],
+      eventosProcessadosDia: [],
+      eventosProcessados: {  
+        ids: [],
+        descricoes: [],      
+        datasIniciais: [],
+        datasFinais: [],
+        sempre:[],
+        cores:[]
+      },
+      
 
       //variáveis de formulário
+      id: null,
       descricao: null,
       data: null,
       ultima_data: null,
@@ -233,18 +251,20 @@ export default {
       cor: null,
       isRegister: true,
       quant: 0,
+      message: null,
 
       // variaveis de controle de exibição:
       mostrarFormulario: false,
       mostrarDia: false,
       estaRedimencionando: false,
-      cardAltura: 350,
+      cardAltura: 400,
       posicaoY: 0
 
     }
   },
   created(){
 
+    this.pedirPermissao();
     //coletar data atual
     var data = new Date()
     this.anoAtual = data.getFullYear()
@@ -256,9 +276,33 @@ export default {
     this.mesSelecionadoString = this.mesString(this.mesSelecionado)
     this.diaSelecionado = this.diaAtual
     this.contagemDia = new Date(this.anoAtual, this.mesSelecionado, 0).getDate()
-
+    this.procurarEventosMes(this.mesAtual, this.anoAtual)
+    this.verificarEventosProximos()
   },
   methods:{
+    
+    pedirPermissao() {
+      if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            console.log("Permissão concedida!");
+          } else {
+            console.log("Permissão negada.");
+          }
+        });
+      } else {
+        console.log("Notificações não são suportadas neste navegador.");
+      }
+    },
+
+    enviarNotificacao(header, body) {
+      if (Notification.permission === "granted") {
+        new Notification(`${header}`, {
+          body: `${body}`,
+          icon: "https://img.icons8.com/lollipop/48/calendar.png"
+        });
+      }
+    },
 
     selecionarCor(cor, id){
 
@@ -284,24 +328,23 @@ export default {
 
     },
 
-    mudarAlturaCard(evento){
+    mudarAlturaCard(evento) {
 
-      evento.preventDefault()
+      if (!this.estaRedimencionando) return;
 
-      if(!this.estaRedimencionando) return;
+      let padraoY = evento.type === "touchmove" 
+        ? evento.touches[0].clientY
+        
+        : evento.clientY;
+        
+      let diferenca = this.posicaoY - padraoY;
+      
+      const alturaAtual = Number(this.cardAltura) || 400;
 
-      let padraoY = evento.type === "touchmove" ? evento.touches[0].clientY : evento.clientY
-      let diferenca = this.posicaoY - evento.clientY;
-      this.cardAltura += diferenca
+      this.cardAltura = Math.max(400, Math.min(600, alturaAtual + diferenca));
 
-      if(this.cardAltura < 350){
-        this.cardAltura = 350
-      }
+      this.posicaoY = padraoY;
 
-      if(this.cardAltura > 600){
-        this.cardAltura = 600
-      }
-      this.posicaoY = padraoY
     },
 
     pararMudancaCard(){
@@ -320,11 +363,12 @@ export default {
       }
 
       if(controle == 'ocultar'){
-        this.exibirMenuAno = false
+        this.exibirMenuMes = false
       }
     },
 
     controleMenuAno(controle){
+
       if(this.exibirMenuAno == true){
         this.exibirMenuAno = false  
       } else{
@@ -334,80 +378,229 @@ export default {
       if(controle == 'ocultar'){
         this.exibirMenuAno = false
       }
+      
     },
 
     adicionarEvento(){
       this.mostrarDia = false
       this.mostrarFormulario = true
       this.isRegister = true
-      this.descricao = null
-      this.data = null
-      this.ultima_data = null
-      this.sempre = true
-      this.cor = null
-      this.quant = 0
+      this.limparFomulario()
     },
 
     ocultarFormulario(){
       this.mostrarFormulario = false
+      this.limparFomulario()
       this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
     }, 
 
-    //procurar eventos por mes com base na escolha do usuário
-    procurarEventosMes(mes, ano){
 
+    //procurar eventos por mes com base na escolha do usuário
+    async procurarEventosMes(mes, ano){
+      
       this.exibirMenuAno = false
       this.exibirMenuMes = false
+      this.limparEventos()
 
       this.contagemDia = new Date(ano, mes, 0).getDate()
       this.anoSelecionado = ano
       this.mesSelecionado = mes
       this.mesSelecionadoString = this.mesString(mes)
-      console.log(`${ano} ${mes} dias: ${this.contagemDia}`)
+
+      await fetch(`${this.apiURL}/eventos/mensal/?ano=${ano}&mes=${String(mes).padStart(2, "0")}`, {
+        method:"GET",
+        headers: {
+          "Content-type":"application/json"
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+
+        this.processarEventos(data, "mes")
+
+      })
+
+      this.eventosSempre.dias = []
+      //coletar os eventos que sempre ocorrem
+      await fetch(`${this.apiURL}/eventos/sempre/?mes=${String(mes).padStart(2, "0")}`, {
+        method:"GET",
+        headers: {
+          "Content-type":"application/json"
+        }
+      })
+      .then(resp => resp.json())
+      .then(data => {
+
+        for (let i = 0; i < data.length; i++) {
+          let day = ""
+          day = new Date(data[i].data)
+          day = day.getUTCDate()
+
+          this.eventosSempre.dias.push(day)
+        
+        }
+
+      })
+      .catch(err => {
+        console.log(err)
+      })
 
     },
 
     async registrarEvento(e){
       e.preventDefault()
+      var data = {}
+      var jsonData = "" 
+      if(this.isRegister){
 
-      const data = {
-        descricao: this.descricao,
-        data: `${this.anoSelecionado}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
-        ultima_data: `${this.anoSelecionado + this.quant}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
-        sempre: this.sempre,
-        cor: this.cor
+        data = {
+          descricao: this.descricao,
+          data: `${this.anoSelecionado}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          ultima_data: `${this.anoSelecionado + this.quant}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          sempre: this.sempre,
+          cor: this.cor
+        }
+
+        jsonData = JSON.stringify(data)
+
+        await fetch(`${this.apiURL}/cadastro/`, {
+          method:"POST",
+          headers:{
+            "Content-type":"application/json"
+          },
+          body: jsonData
+        })
+        .then(resp => resp.json())
+        .then(data => {
+
+          this.message = data.message
+          setTimeout(() => {
+            
+            this.message = null
+            this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
+            this.mostrarFormulario = false
+            this.mostrarDia = true
+            this.limparFomulario()
+
+          }, 1200);
+
+        })
+
+      } else {
+
+        data = {
+          id: this.id,
+          descricao: this.descricao,
+          data: `${this.anoSelecionado}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          ultima_data: `${this.anoSelecionado + this.quant}-${String(this.mesSelecionado).padStart(2, "0")}-${String(this.diaSelecionado).padStart(2,"0")}`,
+          sempre: this.sempre,
+          cor: this.cor
+        }
+       
+        jsonData = JSON.stringify(data)
+
+        await fetch(`${this.apiURL}/update/${this.id}/`, {
+          method:"PUT",
+          headers:{
+            "Content-type":"application/json"
+          },
+          body: jsonData
+        })
+        .then(resp => resp.json())
+        .then(data => {
+
+          this.message = data.message
+          setTimeout(() => {
+            
+            this.message = null
+            this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
+            this.mostrarFormulario = false
+            this.mostrarDia = true
+            this.limparFomulario()
+
+          }, 1200);
+
+        })
+
       }
 
-      const jsonData = JSON.stringify(data)
-      console.log(jsonData)
+    },
 
-      await fetch(`${this.apiURL}/cadastro/`, {
-        method:"POST",
-        headers:{
+    async atualizarEvento(e, id){
+      
+      e.preventDefault()
+      this.limparFomulario()
+      this.mostrarFormulario = true
+      this.mostrarDia = false
+      this.isRegister = false
+
+      await fetch(`${this.apiURL}/unicoevento/${id}/`, {
+        method:"GET",
+        headers: {
           "Content-type":"application/json"
-        },
-        body: jsonData
+        }
       })
       .then(resp => resp.json())
       .then(data => {
-        console.log(data)
+        if(data.message){
+          this.message = data.message
+        }else {
+
+          this.id = id
+          this.descricao = data.descricao
+          this.data = data.data 
+          this.ultima_data = data.ultima_data
+          this.sempre = data.sempre
+          this.cor = data.cor
+
+          switch (data.cor) {
+            case '#777783':
+                this.selecionarCor('#777783', 'color01')
+                break
+            case '#3d7f63':
+                this.selecionarCor('#3d7f63', 'color02')
+                break;
+            case '#d33873':
+                this.selecionarCor('#d33873', 'color03')
+                break
+            case '#c4d338':
+                  this.selecionarCor('#c4d338', 'color04')
+            case '#d33838':
+                this.selecionarCor('#d33838', 'color05')
+                break;
+          }
+
+        }
+
+        setTimeout(() => {
+          this.message = null
+        }, 1500);
+
       })
 
-      console.log("evento adicionado")
     },
 
-    atualizarEvento(e, id){
+    async deletarEvento(e, id){
       e.preventDefault()
-      console.log("evento atualizado")
-    },
-
-    deletarEvento(e, id){
-      e.preventDefault()
-      console.log("evento deletado")
+      await fetch(`${this.apiURL}/delete/${id}/`, {
+        method:"DELETE",
+        headers:{
+          "Content-type":"application/json"
+        }
+      })
+      .then(resp => resp.json)
+      .then(data => {
+        this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
+      })
+      
     },
 
     ocultarCard(){
+
       this.mostrarDia = false
+      this.limparEventos()
+      this.procurarEventosMes(this.mesSelecionado, this.anoSelecionado)
+
     },
 
     //procurar eventos por dia com base na escolha do usuário
@@ -416,23 +609,21 @@ export default {
       this.diaSelecionado = dia
       this.mesSelecionado = mes
       this.mostrarDia = true
-      console.log(`${dia} ${mes}`)
+      this.limparEventos()
 
       await fetch(`${this.apiURL}/eventos/?mes=${String(mes).padStart(2, "0")}&dia=${String(dia).padStart(2, "0")}`, {
         method:"GET",
         headers:{
-          "Coontent-type":"application/json"
+          "Content-type":"application/json"
         }
       })
       .then(resp => resp.json())
       .then(data => {
-        console.log(data)
+
+        this.processarEventos(data, "dia")
+
       })
 
-    },
-
-    ocultarCard(){
-      this.mostrarDia = false
     },
 
     // coleta o numero do mes e retorna o nome do mes por extenso
@@ -463,9 +654,189 @@ export default {
         case 12:
           return "Dezembro"
       }
-    }
+    },
 
+    limparFomulario(){
+      this.id = null,
+      this.descricao = null,
+      this.data = null,
+      this.ultima_data = null,
+      this.sempre = true,
+      this.cor = null,
+      this.isRegister = true,
+      this.quant = 0,
+      this.message = null
+    },
+
+    limparEventos(){
+      this.eventosProcessadosDia = []
+
+      this.eventosProcessados.ids = [],
+      this.eventosProcessados.descricoes = [],      
+      this.eventosProcessados.datasIniciais = [],
+      this.eventosProcessados.datasFinais = [],
+      this.eventosProcessados.sempre = [],
+      this.eventosProcessados.cores = []
+
+      this.eventosSempre.dias = []
+
+    },
+
+    processarEventos(data, metodo){
+
+      let day = ""
+      let month = ""
+      let ano = ""
+      let anoBase = ""
+
+      for (let i = 0; i < data.length; i++) {
+          
+        let eventoModel = {
+          id: null,
+          descricao:null,
+          data:null,
+          ultima_data:null,
+          sempre:false,
+          cor:null
+        }
+         
+        if(metodo == "mes"){
+          if(data[i].sempre == true){
+
+            day = new Date(data[i].data)
+            day = day.getUTCDate()
+
+            this.eventosProcessados.datasIniciais.push(day)
+            this.eventosProcessados.ids.push(data[i].id)
+            this.eventosProcessados.descricoes.push(data[i].descricao)
+            this.eventosProcessados.datasFinais.push(data[i].ultima_data)
+            this.eventosProcessados.sempre.push(data[i].sempre)
+            this.eventosProcessados.cores.push(data[i].cor)
+
+
+          } else {
+
+            anoBase = new Date(data[i].data)
+            anoBase = anoBase.getFullYear()
+            ano = new Date(data[i].ultima_data)
+            ano = ano.getFullYear()
+
+            
+
+            if(this.anoSelecionado <= ano && this.anoSelecionado >= anoBase){
+              day = new Date(data[i].data)
+              day = day.getUTCDate()
+              this.eventosProcessados.datasIniciais.push(day)
+              this.eventosProcessados.ids.push(data[i].id)
+              this.eventosProcessados.descricoes.push(data[i].descricao)
+              this.eventosProcessados.datasFinais.push(data[i].ultima_data)
+              this.eventosProcessados.sempre.push(data[i].sempre)
+              this.eventosProcessados.cores.push(data[i].cor)
+            } else {
+              this.eventosProcessados.datasIniciais.push(null)
+              this.eventosProcessados.ids.push(null)
+              this.eventosProcessados.descricoes.push(null)
+              this.eventosProcessados.datasFinais.push(null)
+              this.eventosProcessados.sempre.push(null)
+              this.eventosProcessados.cores.push(null)
+
+            }
+
+          }
+
+
+        } else {
+
+          if(data[i].sempre){
+
+            day = new Date(data[i].data)
+            day = day.getUTCDate()
+
+            eventoModel.data = day
+            eventoModel.id = data[i].id
+            eventoModel.descricao = data[i].descricao
+            eventoModel.ultima_data = data[i].ultima_data
+            eventoModel.sempre = data[i].sempre
+            eventoModel.cor = data[i].cor
+            this.eventosProcessadosDia.push(eventoModel)
+
+          } else {
+
+            anoBase = new Date(data[i].data)
+            anoBase = anoBase.getFullYear()
+            ano = new Date(data[i].ultima_data)
+            ano = ano.getFullYear()
+
+            if(this.anoSelecionado <= ano && this.anoSelecionado >= anoBase){
+              day = new Date(data[i].data)
+              day = day.getUTCDate()
+              eventoModel.data = day
+              eventoModel.id = data[i].id
+              eventoModel.descricao =  data[i].descricao
+              eventoModel.ultima_data =  data[i].ultima_data
+              eventoModel.sempre = data[i].sempre
+              eventoModel.cor =  data[i].cor
+              this.eventosProcessadosDia.push(eventoModel)
+
+            } else {
+
+              eventoModel.id = null
+              eventoModel.descricao = null
+              eventoModel.data = null
+              eventoModel.ultima_data = null
+              eventoModel.sempre = false
+              eventoModel.cor = null
+              this.eventosProcessadosDia.push(eventoModel)
+
+            }
+          
+          }
+
+        }
+        
+      }
+
+    },
+
+    async verificarEventosProximos() {
+      try {
+        const hoje = new Date();
+        const dataFutura = new Date();
+        dataFutura.setDate(hoje.getDate() + 30);
+        
+        // Formata datas para YYYY-MM-DD
+        const formatarData = (date) => date.toISOString().split('T')[0];
+        
+        const response = await fetch(`${this.apiURL}/eventos/proximos/`, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json"
+          }
+        });
+        
+        const eventos = await response.json();
+        
+        if (eventos.length > 0) {
+          eventos.forEach(evento => {
+            const diasRestantes = Math.floor(
+              (new Date(evento.ultima_data) - hoje) / (1000 * 60 * 60 * 24)
+            );
+            
+            this.enviarNotificacao(
+              evento.descricao, 
+              `Evento em ${diasRestantes} dias!`
+            );
+          });
+        }
+        
+      } catch (err) {
+        console.error("Erro ao verificar eventos:", err);
+        // Opcional: enviar notificação de erro
+        this.enviarNotificacao("Erro", "Não foi possível verificar eventos futuros");
+      }
+    }
   }
+
 }
 </script>
 <style scoped>
@@ -476,6 +847,8 @@ export default {
   display: flex;
   flex-direction: row;
   width: 30%;
+  user-select: none;
+  cursor: pointer;
 }
 
 .header-lista{
@@ -494,6 +867,10 @@ export default {
 #headerAno{
   width: 55px;
   padding: 10px 8px;
+}
+
+#headerMes:active, #headerAno:active{
+  transform:scale(1.09);
 }
 
 .lista-escolha{
@@ -544,12 +921,12 @@ export default {
 .dia:hover{
   box-shadow: 
     0em 0em 0.7em #0000002d,
-    0em 0em 0.7em #e7e7e788 inset;
+    0em 0em 0.7em #13131371 inset;
   ;
 }
 
 .dia:active{
-  scale: 0.9;
+  scale: 0.95;
 }
 
 .ano, .mes{
@@ -562,17 +939,21 @@ export default {
   color: var(--color-main03);
 }
 
+.ano:active, .mes:active{
+  background-color: var(--color-main00);
+  transform: scale(1.06);
+}
+
 .diasSemana{
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background-color: var(--color-main01);
   justify-items: center;
   list-style-type: none;
   max-width: 500px;
   padding: 30px 0;
   border-radius: 10px;
   margin: auto;
-  margin-top: 50px;
+  margin-top: 30px;
 }
 
 .diasSemana li{
@@ -580,11 +961,27 @@ export default {
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 45px;
-  width: 45px;
+  height: 12vw;
+  width: 12vw;
+  max-height: 60px;
+  max-width: 60px;
   margin-block: 7px;
-  background-color: var(--color-main02);
+  background-color: var(--color-main04);
   border-radius: 50%;
+  letter-spacing: 1px;
+  color: var(--color-main00);
+  font-weight: bold;
+  font-size: clamp(0.875rem, 0.6125rem + 1.4vw, 1.75rem);
+}
+
+.indicador{
+  position: absolute;
+  height: 12vw;
+  width: 12vw;
+  max-height: 60px;
+  max-width: 60px;
+  border-radius: 50%;
+  border: 3px solid rgb(0, 247, 255);
 }
 
 
@@ -604,10 +1001,11 @@ export default {
   justify-content: space-around;
   align-items: center;
   color: var(--color-main00);
-  max-width: 90%;
+  width: 90%;
+  max-width: 500px;
   min-width: 330px;
   margin: auto;
-  padding: 10px;
+  padding: 5px;
   margin-block: 10px;
   border-radius: 30px;
 }
@@ -644,6 +1042,19 @@ export default {
 .botao-excluir{
   background-color: rgb(255, 83, 83);
   border-radius: 17px;
+}
+
+.sem-eventos-container{
+  margin-top: 20px;
+}
+
+.sem-eventos-container > button{
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 8px;
+  background-color: var(--color-main02);
+  user-select: none;
+  cursor: pointer;
 }
 
 </style>

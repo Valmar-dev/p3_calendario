@@ -11,9 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,9 +27,12 @@ SECRET_KEY = 'django-insecure-35xy!6gw=pkkb6tx1r682_mb7sv-t@+9m0ya16_+(cty$ev0kn
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "192.168.0.10", "192.168.0.15", ".vercel.app", "*"]
+
 
 # Adicionei a habilitação de cors
 CORS_ALLOW_METHODS = [
@@ -48,6 +53,8 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
 ]
 
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Application definition
 
@@ -99,12 +106,21 @@ WSGI_APPLICATION = 'calendario.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.path.join(BASE_DIR, "data", "db.sqlite3"),
     }
 }
 
+# settings.py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+# Tempo padrão de cache (opcional)
+CACHE_MIDDLEWARE_SECONDS = 86400
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
