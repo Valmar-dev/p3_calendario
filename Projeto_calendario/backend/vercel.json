@@ -9,7 +9,14 @@
     "routes": [
       {
         "src": "/(.*)",
-        "dest": "manage.py"
+        "dest": "index.py"
       }
+    ],
+    "excludeFiles": [
+      "**/tests/**",
+      "**/static/**",
+      "**/media/**",
+      "**/docs/**",
+      "**/.*"
     ]
   }
