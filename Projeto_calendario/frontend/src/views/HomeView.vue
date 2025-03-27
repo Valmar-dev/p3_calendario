@@ -302,7 +302,6 @@ export default {
           icon: "https://img.icons8.com/lollipop/48/calendar.png"
         });
       }
-      console.log(window.location.protocol)
     },
 
     selecionarCor(cor, id){
@@ -369,7 +368,7 @@ export default {
     },
 
     controleMenuAno(controle){
-      console.log("teste")
+
       if(this.exibirMenuAno == true){
         this.exibirMenuAno = false  
       } else{
@@ -379,6 +378,7 @@ export default {
       if(controle == 'ocultar'){
         this.exibirMenuAno = false
       }
+      
     },
 
     adicionarEvento(){
