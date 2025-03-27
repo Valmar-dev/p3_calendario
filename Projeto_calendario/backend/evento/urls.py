@@ -1,6 +1,6 @@
 # evento/urls.py
 from django.urls import path
-from .views import EventoCadastro, EventoList, EventoDelete, EventoUpdate, EventoDetail, EventoMensal, EventoSempre
+from .views import EventoCadastro, EventoList, EventoDelete, EventoUpdate, EventoDetail, EventoMensal, EventoSempre,EventosProximos30Dias
 
 urlpatterns = [
     path('cadastro/', EventoCadastro.as_view(), name='evento-cadastro'),
@@ -10,4 +10,5 @@ urlpatterns = [
     path('unicoevento/<int:id>/', EventoDetail.as_view(), name='evento-detalhe'),
     path('eventos/mensal/', EventoMensal.as_view(), name='evento-mensal'),
     path('eventos/sempre/', EventoSempre.as_view(), name='eventos-sempre'),
+    path('eventos/proximos/', EventosProximos30Dias.as_view(), name='eventos-proximos'),
 ]

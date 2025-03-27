@@ -112,6 +112,15 @@ DATABASES = {
     }
 }
 
+# settings.py
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+    }
+}
+
+# Tempo padrão de cache (opcional)
+CACHE_MIDDLEWARE_SECONDS = 86400
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

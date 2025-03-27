@@ -224,10 +224,13 @@ export default {
       mesSelecionado:0,
       mesSelecionadoString: null,
       diaSelecionado: 0,
+
+      //variaveis para controle de eventos
       eventosSempre:{
         dias:[]
       },
-      eventoMensal: [],
+      faltandoUmMes: [],
+      faltandoUmdia: [],
       eventosProcessadosDia: [],
       eventosProcessados: {  
         ids: [],
@@ -237,6 +240,7 @@ export default {
         sempre:[],
         cores:[]
       },
+      
 
       //variáveis de formulário
       id: null,
@@ -260,6 +264,7 @@ export default {
   },
   created(){
 
+    this.pedirPermissao();
     //coletar data atual
     var data = new Date()
     this.anoAtual = data.getFullYear()
@@ -272,9 +277,33 @@ export default {
     this.diaSelecionado = this.diaAtual
     this.contagemDia = new Date(this.anoAtual, this.mesSelecionado, 0).getDate()
     this.procurarEventosMes(this.mesAtual, this.anoAtual)
-
+    this.verificarEventosProximos()
   },
   methods:{
+    
+    pedirPermissao() {
+      if ("Notification" in window) {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            console.log("Permissão concedida!");
+          } else {
+            console.log("Permissão negada.");
+          }
+        });
+      } else {
+        console.log("Notificações não são suportadas neste navegador.");
+      }
+    },
+
+    enviarNotificacao(header, body) {
+      if (Notification.permission === "granted") {
+        new Notification(`${header}`, {
+          body: `${body}`,
+          icon: "https://img.icons8.com/lollipop/48/calendar.png"
+        });
+      }
+      console.log(window.location.protocol)
+    },
 
     selecionarCor(cor, id){
 
@@ -301,25 +330,23 @@ export default {
     },
 
     mudarAlturaCard(evento) {
-  if (!this.estaRedimencionando) return;
 
-  // Corrigido: Usa evento.clientY para mouse e touches[0].clientY para touch
-  let padraoY = evento.type === "touchmove" 
-    ? evento.touches[0].clientY  // Remove .toFixed(0) para manter como número
-    : evento.clientY;  // Usa evento.clientY para mousemove (não this.posicaoY)
+      if (!this.estaRedimencionando) return;
 
-  // Corrigido: Usa a variável local `padraoY` (não this.padraoY)
-  let diferenca = this.posicaoY - padraoY;
+      let padraoY = evento.type === "touchmove" 
+        ? evento.touches[0].clientY
+        
+        : evento.clientY;
+        
+      let diferenca = this.posicaoY - padraoY;
+      
+      const alturaAtual = Number(this.cardAltura) || 400;
 
-  // Garante que cardAltura seja um número (evita NaN)
-  const alturaAtual = Number(this.cardAltura) || 400;
+      this.cardAltura = Math.max(400, Math.min(600, alturaAtual + diferenca));
 
-  // Atualiza a altura dentro dos limites (400-600)
-  this.cardAltura = Math.max(400, Math.min(600, alturaAtual + diferenca));
+      this.posicaoY = padraoY;
 
-  // Atualiza posicaoY para o próximo cálculo
-  this.posicaoY = padraoY;
-},
+    },
 
     pararMudancaCard(){
       this.estaRedimencionando = false
@@ -367,9 +394,10 @@ export default {
       this.procurarEventosDia(this.diaSelecionado, this.mesSelecionado)
     }, 
 
+
     //procurar eventos por mes com base na escolha do usuário
     async procurarEventosMes(mes, ano){
-
+      
       this.exibirMenuAno = false
       this.exibirMenuMes = false
       this.limparEventos()
@@ -768,9 +796,47 @@ export default {
         
       }
 
-    }
+    },
 
+    async verificarEventosProximos() {
+      try {
+        const hoje = new Date();
+        const dataFutura = new Date();
+        dataFutura.setDate(hoje.getDate() + 30);
+        
+        // Formata datas para YYYY-MM-DD
+        const formatarData = (date) => date.toISOString().split('T')[0];
+        
+        const response = await fetch(`${this.apiURL}/eventos/proximos/`, {
+          method: "GET",
+          headers: {
+            "Content-type": "application/json"
+          }
+        });
+        
+        const eventos = await response.json();
+        
+        if (eventos.length > 0) {
+          eventos.forEach(evento => {
+            const diasRestantes = Math.floor(
+              (new Date(evento.ultima_data) - hoje) / (1000 * 60 * 60 * 24)
+            );
+            
+            this.enviarNotificacao(
+              evento.descricao, 
+              `Evento em ${diasRestantes} dias!`
+            );
+          });
+        }
+        
+      } catch (err) {
+        console.error("Erro ao verificar eventos:", err);
+        // Opcional: enviar notificação de erro
+        this.enviarNotificacao("Erro", "Não foi possível verificar eventos futuros");
+      }
+    }
   }
+
 }
 </script>
 <style scoped>

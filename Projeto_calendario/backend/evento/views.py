@@ -1,3 +1,5 @@
+from functools import cache
+from django.core.cache import cache
 from django.shortcuts import render
 
 # evento/views.py
@@ -8,7 +10,7 @@ from .models import Evento
 from .serializers import EventoSerializer
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
-from datetime import date
+from datetime import date, datetime, timedelta
 from django.db import models
 
 
@@ -54,7 +56,39 @@ class EventoList(APIView):
         return Response(serializer.data)  # Retorna a lista de eventos em formato JSON
 
 
-    
+# rota para ajudar a verificar as notificações, coleta tambem o ano
+class EventosProximos30Dias(APIView):
+    def get(self, request):
+        try:
+            # Chave de cache única por dia
+            hoje = datetime.now().date()
+            cache_key = f"eventos_30dias_{hoje}"
+            
+            # Busca no cache
+            eventos_cache = cache.get(cache_key)
+            
+            if eventos_cache is not None:
+                return Response(eventos_cache)
+            
+            # Se não estiver no cache, busca no banco
+            data_futura = hoje + timedelta(days=30)
+            eventos = Evento.objects.filter(
+                ultima_data__range=[hoje, data_futura]
+            ).order_by('ultima_data')
+            
+            serializer = EventoSerializer(eventos, many=True)
+            dados_serializados = serializer.data
+            
+            # Armazena no cache
+            cache.set(cache_key, dados_serializados, timeout=86400)  # 24h
+            
+            return Response(dados_serializados)
+            
+        except Exception as e:
+            return Response(
+                {"error": f"Erro ao buscar eventos: {str(e)}"},
+                status=500
+            )
 
 # Fução para deletar. Método DELETE
 class EventoDelete(APIView):
