@@ -60,35 +60,19 @@ class EventoList(APIView):
 class EventosProximos30Dias(APIView):
     def get(self, request):
         try:
-            # Chave de cache única por dia
-            hoje = datetime.now().date()
-            cache_key = f"eventos_30dias_{hoje}"
+            data_atual = datetime.now().date()
+            data_futura = data_atual + timedelta(days=30)
             
-            # Busca no cache
-            eventos_cache = cache.get(cache_key)
-            
-            if eventos_cache is not None:
-                return Response(eventos_cache)
-            
-            # Se não estiver no cache, busca no banco
-            data_futura = hoje + timedelta(days=30)
             eventos = Evento.objects.filter(
-                ultima_data__range=[hoje, data_futura]
+                ultima_data__gte=data_atual,
+                ultima_data__lte=data_futura
             ).order_by('ultima_data')
             
             serializer = EventoSerializer(eventos, many=True)
-            dados_serializados = serializer.data
-            
-            # Armazena no cache
-            cache.set(cache_key, dados_serializados, timeout=86400)  # 24h
-            
-            return Response(dados_serializados)
+            return Response(serializer.data)
             
         except Exception as e:
-            return Response(
-                {"error": f"Erro ao buscar eventos: {str(e)}"},
-                status=500
-            )
+            return Response({"message": str(e)}, status=500)
 
 # Fução para deletar. Método DELETE
 class EventoDelete(APIView):

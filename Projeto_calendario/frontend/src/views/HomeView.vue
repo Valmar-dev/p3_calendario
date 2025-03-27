@@ -824,7 +824,7 @@ export default {
             
             this.enviarNotificacao(
               evento.descricao, 
-              `Evento em ${diasRestantes} dias!`
+              `Evento em ${diasRestantes + 1} dias!`
             );
           });
         }
