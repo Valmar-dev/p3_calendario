@@ -121,6 +121,10 @@
 
               </section>
 
+              <div class="sem-eventos-container" v-if="eventosProcessadosDia.length == 0">
+                <p>Não há eventos para esse dia :/</p> <button @click="adicionarEvento()"> Crie um evento!</button>
+              </div>
+
             </div>
 
           </div>
@@ -196,19 +200,6 @@
 
 <script>
 
-/* 
-
-- fazer estilos dos dias
-- fazer estilos de evento por card
-- fazer estilos do formularios
-- fazer estilos de tamanho de fonte por card
-
--- fazer a versão pc ( faze verificalçao para realizar a função resize apenas para celulares )
-
--- preparar pra receber a API
-
-*/
-
 import {BASE_URL} from '@/config'
 
 export default {
@@ -262,7 +253,7 @@ export default {
       mostrarFormulario: false,
       mostrarDia: false,
       estaRedimencionando: false,
-      cardAltura: 350,
+      cardAltura: 400,
       posicaoY: 0
 
     }
@@ -309,25 +300,26 @@ export default {
 
     },
 
-    mudarAlturaCard(evento){
+    mudarAlturaCard(evento) {
+  if (!this.estaRedimencionando) return;
 
-      evento.preventDefault()
+  // Corrigido: Usa evento.clientY para mouse e touches[0].clientY para touch
+  let padraoY = evento.type === "touchmove" 
+    ? evento.touches[0].clientY  // Remove .toFixed(0) para manter como número
+    : evento.clientY;  // Usa evento.clientY para mousemove (não this.posicaoY)
 
-      if(!this.estaRedimencionando) return;
+  // Corrigido: Usa a variável local `padraoY` (não this.padraoY)
+  let diferenca = this.posicaoY - padraoY;
 
-      let padraoY = evento.type === "touchmove" ? evento.touches[0].clientY : evento.clientY
-      let diferenca = this.posicaoY - evento.clientY;
-      this.cardAltura += diferenca
+  // Garante que cardAltura seja um número (evita NaN)
+  const alturaAtual = Number(this.cardAltura) || 400;
 
-      if(this.cardAltura < 350){
-        this.cardAltura = 350
-      }
+  // Atualiza a altura dentro dos limites (400-600)
+  this.cardAltura = Math.max(400, Math.min(600, alturaAtual + diferenca));
 
-      if(this.cardAltura > 600){
-        this.cardAltura = 600
-      }
-      this.posicaoY = padraoY
-    },
+  // Atualiza posicaoY para o próximo cálculo
+  this.posicaoY = padraoY;
+},
 
     pararMudancaCard(){
       this.estaRedimencionando = false
@@ -350,6 +342,7 @@ export default {
     },
 
     controleMenuAno(controle){
+      console.log("teste")
       if(this.exibirMenuAno == true){
         this.exibirMenuAno = false  
       } else{
@@ -810,6 +803,10 @@ export default {
   padding: 10px 8px;
 }
 
+#headerMes:active, #headerAno:active{
+  transform:scale(1.09);
+}
+
 .lista-escolha{
   position: absolute;
   margin: 0 10px 0 10px;
@@ -863,7 +860,7 @@ export default {
 }
 
 .dia:active{
-  scale: 0.9;
+  scale: 0.95;
 }
 
 .ano, .mes{
@@ -874,6 +871,11 @@ export default {
   background-attachment: fixed;
   background-color: var(--color-main01);
   color: var(--color-main03);
+}
+
+.ano:active, .mes:active{
+  background-color: var(--color-main00);
+  transform: scale(1.06);
 }
 
 .diasSemana{
@@ -893,21 +895,25 @@ export default {
   justify-content: center;
   align-items: center;
   text-align: center;
-  height: 52px;
-  width: 52px;
+  height: 12vw;
+  width: 12vw;
+  max-height: 60px;
+  max-width: 60px;
   margin-block: 7px;
   background-color: var(--color-main04);
   border-radius: 50%;
   letter-spacing: 1px;
   color: var(--color-main00);
   font-weight: bold;
-  font-size: 1.3em;
+  font-size: clamp(0.875rem, 0.6125rem + 1.4vw, 1.75rem);
 }
 
 .indicador{
   position: absolute;
-  width: 53px;
-  height: 53px;
+  height: 12vw;
+  width: 12vw;
+  max-height: 60px;
+  max-width: 60px;
   border-radius: 50%;
   border: 3px solid rgb(0, 247, 255);
 }
@@ -970,6 +976,19 @@ export default {
 .botao-excluir{
   background-color: rgb(255, 83, 83);
   border-radius: 17px;
+}
+
+.sem-eventos-container{
+  margin-top: 20px;
+}
+
+.sem-eventos-container > button{
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 8px;
+  background-color: var(--color-main02);
+  user-select: none;
+  cursor: pointer;
 }
 
 </style>

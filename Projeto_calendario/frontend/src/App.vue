@@ -28,6 +28,7 @@ export default {
   --color-main02:#9cced1;
   --color-main03:#497a96;
   --color-main04:#16415e;
+  --color-main05:#dfebf3;
 
   --color-event00:#777783;
   --color-event01:#3d7f63;
@@ -41,6 +42,10 @@ export default {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+body{
+  background-color: var(--color-main05);
 }
 
 button{
@@ -98,10 +103,11 @@ section#dataEscolhida{
   flex-direction: row;
   justify-content: center;
   align-items: center;
+  color: var(--color-main04);
   width: 100%;
   margin-left: 170px;
   margin-top: 15px;
-  font-size: clamp(1.125rem, 0.8947rem + 1.0526vw, 1.75rem);
+  font-size: clamp(0.875rem, 0.6125rem + 1.4vw, 1.75rem);;
 }
 
 .home-view{
@@ -114,17 +120,17 @@ section#dataEscolhida{
   z-index: 1000;
   width: 100vw;
   height: 100vh;
-  background-color: var(--color-main00);;
-  opacity: 0.7;
+  background-color: var(--color-main04);;
+  opacity: 0.4;
 }
 
 .card{
   position: fixed;
   bottom: 0;
   z-index: 1001;
-  background-color: var(--color-main02);;
+  background-color: var(--color-main00);;
   width: 100vw;
-  padding: 0 0 0 0;
+  padding: 0 0 30px 0;
   border-radius: 40px 40px 0 0;
   opacity: 1;
   border: none;
@@ -144,7 +150,7 @@ section#dataEscolhida{
   justify-content: center;
   align-items: center;
   padding: 0 20px;
-  background-color: var(--color-main02);
+  background-color: var(--color-main00);
   padding: 10px;
   z-index: 1002;
 }
@@ -152,10 +158,10 @@ section#dataEscolhida{
 .bar{
   position: absolute;
   top: 10px;
-  right: 50vw;
+  right: 48vw;
   transform: translateX(50%) ;
-  width: 30%;
-  height: 10px;
+  width: 40%;
+  height: 14px;
   background-color: var(--color-main04);
   border-radius: 10px;
   z-index: 1003;
@@ -319,8 +325,12 @@ footer{
   position: fixed;
   bottom: 0;
   width: 100vw;
-  background-color: var(--color-main01);
+  background-color: var(--color-main03);
+  color: #fff;
   padding: 3px 0;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.8em;
+  letter-spacing: 1px;
   z-index: 1002;
   cursor: default;
 }
